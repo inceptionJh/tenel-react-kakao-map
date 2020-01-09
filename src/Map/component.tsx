@@ -111,6 +111,7 @@ KakaoMap.defaultProps = {
     max: 14,
     options: { animate: { duration: 300 } },
   },
+  overlayMapTypes: [],
 };
 
 export default (() => KakaoMap)();
