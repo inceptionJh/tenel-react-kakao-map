@@ -17,6 +17,171 @@ const useDrag = (map: IKakaoMap, draggable: boolean) => {
   }, [draggable]);
 };
 
+const useMouseMoveEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onMouseMove = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "mousemove", onMouseMove);
+
+    return () => kakao.maps.event.removeListener(map, "mousemove", onMouseMove);
+  }, []);
+};
+
+const useClickEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onClick = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "click", onClick);
+
+    return () => kakao.maps.event.removeListener(map, "click", onClick);
+  }, []);
+};
+
+const useDoubleClickEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onDoubleClick = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "dbclick", onDoubleClick);
+
+    return () => kakao.maps.event.removeListener(map, "dbclick", onDoubleClick);
+  }, []);
+};
+
+const useRightClickEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onRightClick = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "rightclick", onRightClick);
+
+    return () => kakao.maps.event.removeListener(map, "rightclick", onRightClick);
+  }, []);
+};
+
+const useDragStartEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onDragStart = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "dragstart", onDragStart);
+
+    return () => kakao.maps.event.removeListener(map, "dragstart", onDragStart);
+  }, []);
+};
+
+const useDragEndEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onDragEnd = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "dragend", onDragEnd);
+
+    return () => kakao.maps.event.removeListener(map, "dragend", onDragEnd);
+  }, []);
+};
+
+const useDragEvent = (
+  map: IKakaoMap,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onDrag = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "drag", onDrag);
+
+    return () => kakao.maps.event.removeListener(map, "drag", onDrag);
+  }, []);
+};
+
+const useZoomStartEvent = (
+  map: IKakaoMap,
+  callback: (e: { zoomLevel: number }) => void,
+) => {
+  React.useEffect(() => {
+    const onDrag = () => {
+      const zoomLevel = map.getLevel();
+      const e = { zoomLevel };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "zoom_start", onDrag);
+
+    return () => kakao.maps.event.removeListener(map, "zoom_start", onDrag);
+  }, []);
+};
+
+const useZoomChangedEvent = (
+  map: IKakaoMap,
+  callback: (e: { zoomLevel: number }) => void,
+) => {
+  React.useEffect(() => {
+    const onDrag = () => {
+      const zoomLevel = map.getLevel();
+      const e = { zoomLevel };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "zoom_changed", onDrag);
+
+    return () => kakao.maps.event.removeListener(map, "zoom_changed", onDrag);
+  }, []);
+};
+
 const useZoom = (map: IKakaoMap, zoomable: boolean, min: number, max: number, value: number, duration: number) => {
   React.useEffect(() => {
     map.setZoomable(zoomable);
@@ -99,6 +264,15 @@ const useOverlayMapTypes = (map: IKakaoMap, overlayMapTypes: (keyof typeof kakao
 export default {
   useCenter,
   useDrag,
+  useClickEvent,
+  useDoubleClickEvent,
+  useRightClickEvent,
+  useMouseMoveEvent,
+  useDragStartEvent,
+  useDragEvent,
+  useDragEndEvent,
+  useZoomStartEvent,
+  useZoomChangedEvent,
   useZoom,
   useCursor,
   useCopyright,
