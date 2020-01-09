@@ -1,0 +1,37 @@
+{
+  "name": "tenel-react-kakao-map",
+  "version": "1.0.0",
+  "description": "kakao map with React",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel _test/index.html --open"
+  },
+  "keywords": [
+    "react-kakao-map"
+  ],
+  "author": "jaehun kim <kjaehun6546@gmail.com>",
+  "repository": "https://github.com/inceptionJh/tenel-react-kakao-map",
+  "homepage": "https://github.com/inceptionJh/tenel-react-kakao-map",
+  "bugs": "https://github.com/inceptionJh/tenel-react-kakao-map/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://www.opensource.org/licenses/mit-license.php"
+    }
+  ],
+  "peerDependencies": {
+    "tenel-kakao-map": "^1.0.12",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.13",
+    "@types/react-dom": "^16.9.4",
+    "parcel-bundler": "^1.12.4",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "tenel-kakao-map": "^1.0.13",
+    "typescript": "^3.7.2"
+  }
+}
