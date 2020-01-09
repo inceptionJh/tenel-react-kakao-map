@@ -1,14 +1,37 @@
-import { IKakao, IKakaoMouseEvent } from "tenel-kakao-map";
+import { IKakao, IKakaoMouseEvent, IKakaoCopyrightPosition } from "tenel-kakao-map";
 
 import * as React from "react";
 
 import KakaoMapContext from "./context";
 
+import _hooks from "./hooks";
+
 declare var kakao: IKakao;
 
 export interface IKakaoMapsMapProps {
-  className?: string;
   container: HTMLElement;
+  center: { lat: number, lng: number };
+  overlayMapTypes?: (keyof typeof kakao.maps.MapTypeId)[];
+  cursor?: string;
+  draggable?: boolean;
+  zoomable?: boolean;
+  level?: {
+    value: number,
+    min?: number;
+    max?: number;
+    options?: { animate: { duration: number } },
+  };
+  copyright?: {
+    position: keyof IKakaoCopyrightPosition;
+    reverse?: boolean;
+  };
+  bounds?: {
+    value: [{ lat: number, lng: number }, { lat: number, lng: number }],
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
+  };
   onZoomStart?: () => void;
   onZoomChange?: () => void;
   onTilesLoaded?: () => void;
@@ -26,11 +49,8 @@ export interface IKakaoMapsMapProps {
 
 const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   const [map] = React.useState(() => {
-    const options = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667),
-      level: 3,
-    };
-
+    const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
+    const options = { center: latlng };
     return new kakao.maps.Map(props.container, options);
   });
 
@@ -66,11 +86,31 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
     };
   }, []);
 
+  _hooks.useCenter(map, props.center);
+  _hooks.useDrag(map, props.draggable!);
+  _hooks.useZoom(map, props.zoomable!, props.level!.min!, props.level!.max!, props.level!.value!, props.level!.options!.animate.duration!);
+  _hooks.useCursor(map, props.cursor);
+  _hooks.useBounds(map, props.bounds!);
+  _hooks.useCopyright(map, props.copyright!);
+  _hooks.useOverlayMapTypes(map, props.overlayMapTypes!);
+
   return (
     <KakaoMapContext.Provider value={{ map }}>
       {props.children}
     </KakaoMapContext.Provider>
   );
+};
+
+KakaoMap.defaultProps = {
+  zoomable: true,
+  draggable: true,
+  copyright: { position: "BOTTOMLEFT", reverse: false },
+  level: {
+    value: 3,
+    min: 1,
+    max: 14,
+    options: { animate: { duration: 300 } },
+  },
 };
 
 export default (() => KakaoMap)();
