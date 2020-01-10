@@ -15,12 +15,10 @@ export interface IKakaoMapsMapProps {
   cursor?: string;
   draggable?: boolean;
   zoomable?: boolean;
-  level?: {
-    value: number,
-    min?: number;
-    max?: number;
-    options?: { animate: { duration: number } },
-  };
+  level?: number;
+  minLevel?: number;
+  maxLevel?: number;
+  levelDuration?: number;
   copyright?: {
     position: keyof IKakaoCopyrightPosition;
     reverse?: boolean;
@@ -72,7 +70,7 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   _hooks.useCopyright(map, props.copyright!);
   _hooks.useOverlayMapTypes(map, props.overlayMapTypes!);
 
-  _hooks.useZoom(map, props.zoomable!, props.level!.min!, props.level!.max!, props.level!.value!, props.level!.options!.animate.duration!);
+  _hooks.useZoom(map, props.zoomable!, props.minLevel!, props.maxLevel!, props.level!, props.levelDuration!);
   _hooks.useZoomStartEvent(map, props.onZoomStart!);
   _hooks.useZoomChangedEvent(map, props.onZoomChange!);
 
@@ -94,12 +92,10 @@ KakaoMap.defaultProps = {
   zoomable: true,
   draggable: true,
   copyright: { position: "BOTTOMLEFT", reverse: false },
-  level: {
-    value: 3,
-    min: 1,
-    max: 14,
-    options: { animate: { duration: 300 } },
-  },
+  level: 3,
+  minLevel: 1,
+  maxLevel: 14,
+  levelDuration: 300,
   overlayMapTypes: [],
   onDrag: () => undefined,
   onDragEnd: () => undefined,
