@@ -1,6 +1,6 @@
 {
   "name": "tenel-react-kakao-map",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "kakao map with React",
   "main": "build/index.js",
   "scripts": {
