@@ -238,26 +238,26 @@ const useBounds = (
 };
 
 const useOverlayMapTypes = (map: IKakaoMap, overlayMapTypes: (keyof typeof kakao.maps.MapTypeId)[]) => {
-  const [_overlayMapTypes, _setOverlayMapTypes] = React.useState(overlayMapTypes);
+  const [prevOverlayMapTypes, setPrevOverlayMapTypes] = React.useState(overlayMapTypes);
 
   React.useEffect(() => {
     overlayMapTypes.forEach((currType) => map.addOverlayMapTypeId(kakao.maps.MapTypeId[currType]));
   }, []);
 
   React.useEffect(() => {
-    _overlayMapTypes.forEach((prevType) => {
+    prevOverlayMapTypes.forEach((prevType) => {
       if (!(overlayMapTypes.includes(prevType))) {
         map.removeOverlayMapTypeId(kakao.maps.MapTypeId[prevType]);
       }
     });
 
     overlayMapTypes.forEach((currType) => {
-      if (!(overlayMapTypes!.includes(currType))) {
+      if (!(prevOverlayMapTypes.includes(currType))) {
         map.addOverlayMapTypeId(kakao.maps.MapTypeId[currType]);
       }
     });
 
-    _setOverlayMapTypes(overlayMapTypes);
+    setPrevOverlayMapTypes(overlayMapTypes);
   }, [overlayMapTypes]);
 };
 
