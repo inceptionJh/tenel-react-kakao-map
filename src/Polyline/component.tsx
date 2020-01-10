@@ -5,6 +5,8 @@ import * as React from "react";
 import KakaoMapContext from "../Map/context";
 import PolylineContext from "./context";
 
+import _hooks from "./hooks";
+
 declare var kakao: IKakao;
 
 export interface IKakaoMapsPolylineProps {
@@ -15,11 +17,11 @@ export interface IKakaoMapsPolylineProps {
   strokeOpacity?: number;
   strokeStyle?: TKakaoStrokeStyles;
   zIndex?: number;
-  onClick?: (e: IKakaoMouseEvent) => void;
-  onMouseDown?: (e: IKakaoMouseEvent) => void;
-  onMouseMove?: (e: IKakaoMouseEvent) => void;
-  onMouseOut?: (e: IKakaoMouseEvent) => void;
-  onMouseOver?: (e: IKakaoMouseEvent) => void;
+  onClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseDown?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
 const Polyline: React.FunctionComponent<IKakaoMapsPolylineProps> = (props) => {
@@ -29,60 +31,38 @@ const Polyline: React.FunctionComponent<IKakaoMapsPolylineProps> = (props) => {
     return new kakao.maps.Polyline();
   });
 
-  React.useEffect(() => {
-    polyline.setMap(mapCtx.map);
-    return () => polyline.setMap(null);
-  }, []);
+  _hooks.useInit(polyline, mapCtx.map);
+  _hooks.usePath(polyline, props.path);
+  _hooks.useStrokeWeight(polyline, props.strokeWeight!);
+  _hooks.useStrokeColor(polyline, props.strokeColor!);
+  _hooks.useStrokeOpacity(polyline, props.strokeOpacity!);
+  _hooks.useStrokeStyle(polyline, props.strokeStyle!);
+  _hooks.useZIndex(polyline, props.zIndex!);
 
-  React.useEffect(() => {
-    props.onClick && kakao.maps.event.addListener(polyline, "click", props.onClick);
-    props.onMouseDown && kakao.maps.event.addListener(polyline, "mousedown", props.onMouseDown);
-    props.onMouseMove && kakao.maps.event.addListener(polyline, "mousemove", props.onMouseMove);
-    props.onMouseOut && kakao.maps.event.addListener(polyline, "mouseout", props.onMouseOut);
-    props.onMouseOver && kakao.maps.event.addListener(polyline, "mouseover", props.onMouseOver);
-
-    return () => {
-      props.onClick && kakao.maps.event.removeListener(polyline, "click", props.onClick);
-      props.onMouseDown && kakao.maps.event.removeListener(polyline, "mousedown", props.onMouseDown);
-      props.onMouseMove && kakao.maps.event.removeListener(polyline, "mousemove", props.onMouseMove);
-      props.onMouseOut && kakao.maps.event.removeListener(polyline, "mouseout", props.onMouseOut);
-      props.onMouseOver && kakao.maps.event.removeListener(polyline, "mouseover", props.onMouseOver);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    const path = props.path.map((position) => {
-      return new kakao.maps.LatLng(position.lat, position.lng);
-    });
-
-    polyline.setPath(path);
-  }, [props.path]);
-
-  React.useEffect(() => {
-    props.strokeWeight !== undefined ? polyline.setOptions({ strokeWeight: props.strokeWeight }) : null;
-  }, [props.strokeWeight]);
-
-  React.useEffect(() => {
-    props.strokeColor !== undefined ? polyline.setOptions({ strokeColor: props.strokeColor }) : null;
-  }, [props.strokeColor]);
-
-  React.useEffect(() => {
-    props.strokeOpacity !== undefined ? polyline.setOptions({ strokeOpacity: props.strokeOpacity }) : null;
-  }, [props.strokeOpacity]);
-
-  React.useEffect(() => {
-    props.strokeStyle !== undefined ? polyline.setOptions({ strokeStyle: props.strokeStyle }) : null;
-  }, [props.strokeStyle]);
-
-  React.useEffect(() => {
-    props.zIndex !== undefined ? polyline.setZIndex(props.zIndex) : null;
-  }, [props.zIndex]);
+  _hooks.useClickEvent(polyline, props.onClick!);
+  _hooks.useMouseMoveEvent(polyline, props.onMouseMove!);
+  _hooks.useMouseDownEvent(polyline, props.onMouseMove!);
+  _hooks.useMouseOverEvent(polyline, props.onMouseOver!);
+  _hooks.useMouseOutEvent(polyline, props.onMouseOut!);
 
   return (
     <PolylineContext.Provider value={{ polyline }}>
       {props.children}
     </PolylineContext.Provider>
   );
+};
+
+Polyline.defaultProps = {
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+  onClick: () => undefined,
+  onMouseDown: () => undefined,
+  onMouseMove: () => undefined,
+  onMouseOut: () => undefined,
+  onMouseOver: () => undefined,
 };
 
 export default (() => Polyline)();

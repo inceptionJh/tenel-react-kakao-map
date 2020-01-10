@@ -1,9 +1,11 @@
-import { IKakao, TKakaoStrokeStyles, IKakaoEllipse, IKakaoMouseEvent } from "tenel-kakao-map";
+import { IKakao, TKakaoStrokeStyles, IKakaoEllipse } from "tenel-kakao-map";
 
 import * as React from "react";
 
 import KakaoMapContext from "../Map/context";
 import EllipseContext from "./context";
+
+import _hooks from "./hooks";
 
 declare var kakao: IKakao;
 
@@ -19,11 +21,11 @@ export interface IKakaoMapsEllipseProps {
   strokeOpacity?: number;
   strokeStyle?: TKakaoStrokeStyles;
   zIndex?: number;
-  onClick?: (e: IKakaoMouseEvent) => void;
-  onMouseDown?: (e: IKakaoMouseEvent) => void;
-  onMouseMove?: (e: IKakaoMouseEvent) => void;
-  onMouseOut?: (e: IKakaoMouseEvent) => void;
-  onMouseOver?: (e: IKakaoMouseEvent) => void;
+  onClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseDown?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
 const Ellipse: React.FunctionComponent<IKakaoMapsEllipseProps> = (props) => {
@@ -33,69 +35,43 @@ const Ellipse: React.FunctionComponent<IKakaoMapsEllipseProps> = (props) => {
     return new kakao.maps.Ellipse({ rx: props.rx, ry: props.ry });
   });
 
-  React.useEffect(() => {
-    ellipse.setMap(mapCtx.map);
-    return () => ellipse.setMap(null);
-  }, []);
+  _hooks.useInit(ellipse, mapCtx.map);
+  _hooks.usePosition(ellipse, props.position);
+  _hooks.useRadius(ellipse, { rx: props.rx, ry: props.ry });
+  _hooks.useFillColor(ellipse, props.fillColor!);
+  _hooks.useFillOpacity(ellipse, props.fillOpacity!);
+  _hooks.useStrokeWeight(ellipse, props.strokeWeight!);
+  _hooks.useStrokeColor(ellipse, props.strokeColor!);
+  _hooks.useStrokeOpacity(ellipse, props.strokeOpacity!);
+  _hooks.useStrokeStyle(ellipse, props.strokeStyle!);
+  _hooks.useZIndex(ellipse, props.zIndex!);
 
-  React.useEffect(() => {
-    props.onClick && kakao.maps.event.addListener(ellipse, "click", props.onClick);
-    props.onMouseDown && kakao.maps.event.addListener(ellipse, "mousedown", props.onMouseDown);
-    props.onMouseMove && kakao.maps.event.addListener(ellipse, "mousemove", props.onMouseMove);
-    props.onMouseOut && kakao.maps.event.addListener(ellipse, "mouseout", props.onMouseOut);
-    props.onMouseOver && kakao.maps.event.addListener(ellipse, "mouseover", props.onMouseOver);
-
-    return () => {
-      props.onClick && kakao.maps.event.removeListener(ellipse, "click", props.onClick);
-      props.onMouseDown && kakao.maps.event.removeListener(ellipse, "mousedown", props.onMouseDown);
-      props.onMouseMove && kakao.maps.event.removeListener(ellipse, "mousemove", props.onMouseMove);
-      props.onMouseOut && kakao.maps.event.removeListener(ellipse, "mouseout", props.onMouseOut);
-      props.onMouseOver && kakao.maps.event.removeListener(ellipse, "mouseover", props.onMouseOver);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    const latlng = new kakao.maps.LatLng(props.position.lat, props.position.lng);
-    ellipse.setPosition(latlng);
-  }, [props.position]);
-
-  React.useEffect(() => {
-    ellipse.setRadius(props.rx, props.ry);
-  }, [props.rx, props.ry]);
-
-  React.useEffect(() => {
-    props.fillColor !== undefined ? ellipse.setOptions({ fillColor: props.fillColor }) : null;
-  }, [props.fillColor]);
-
-  React.useEffect(() => {
-    props.fillOpacity !== undefined ? ellipse.setOptions({ fillOpacity: props.fillOpacity }) : null;
-  }, [props.fillOpacity]);
-
-  React.useEffect(() => {
-    props.strokeWeight !== undefined ? ellipse.setOptions({ strokeWeight: props.strokeWeight }) : null;
-  }, [props.strokeWeight]);
-
-  React.useEffect(() => {
-    props.strokeColor !== undefined ? ellipse.setOptions({ strokeColor: props.strokeColor }) : null;
-  }, [props.strokeColor]);
-
-  React.useEffect(() => {
-    props.strokeOpacity !== undefined ? ellipse.setOptions({ strokeOpacity: props.strokeOpacity }) : null;
-  }, [props.strokeOpacity]);
-
-  React.useEffect(() => {
-    props.strokeStyle !== undefined ? ellipse.setOptions({ strokeStyle: props.strokeStyle }) : null;
-  }, [props.strokeStyle]);
-
-  React.useEffect(() => {
-    props.zIndex !== undefined ? ellipse.setZIndex(props.zIndex) : null;
-  }, [props.zIndex]);
+  _hooks.useClickEvent(ellipse, props.onClick!);
+  _hooks.useMouseMoveEvent(ellipse, props.onMouseMove!);
+  _hooks.useMouseDownEvent(ellipse, props.onMouseMove!);
+  _hooks.useMouseOverEvent(ellipse, props.onMouseOver!);
+  _hooks.useMouseOutEvent(ellipse, props.onMouseOut!);
 
   return (
     <EllipseContext.Provider value={{ ellipse }}>
       {props.children}
     </EllipseContext.Provider>
   );
+};
+
+Ellipse.defaultProps = {
+  fillColor: "transparent",
+  fillOpacity: 1,
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+  onClick: () => undefined,
+  onMouseDown: () => undefined,
+  onMouseMove: () => undefined,
+  onMouseOut: () => undefined,
+  onMouseOver: () => undefined,
 };
 
 export default (() => Ellipse)();

@@ -5,6 +5,8 @@ import * as React from "react";
 import KakaoMapContext from "../Map/context";
 import PolygonContext from "./context";
 
+import _hooks from "./hooks";
+
 declare var kakao: IKakao;
 
 export interface IKakaoMapsPolygonProps {
@@ -17,11 +19,11 @@ export interface IKakaoMapsPolygonProps {
   strokeOpacity?: number;
   strokeStyle?: TKakaoStrokeStyles;
   zIndex?: number;
-  onClick?: (e: IKakaoMouseEvent) => void;
-  onMouseDown?: (e: IKakaoMouseEvent) => void;
-  onMouseMove?: (e: IKakaoMouseEvent) => void;
-  onMouseOut?: (e: IKakaoMouseEvent) => void;
-  onMouseOver?: (e: IKakaoMouseEvent) => void;
+  onClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseDown?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
 const Polygon: React.FunctionComponent<IKakaoMapsPolygonProps> = (props) => {
@@ -31,69 +33,42 @@ const Polygon: React.FunctionComponent<IKakaoMapsPolygonProps> = (props) => {
     return new kakao.maps.Polygon();
   });
 
-  React.useEffect(() => {
-    polygon.setMap(mapCtx.map);
-    return () => polygon.setMap(null);
-  }, []);
+  _hooks.useInit(polygon, mapCtx.map);
+  _hooks.usePath(polygon, props.path);
+  _hooks.useFillColor(polygon, props.fillColor!);
+  _hooks.useFillOpacity(polygon, props.fillOpacity!);
+  _hooks.useStrokeWeight(polygon, props.strokeWeight!);
+  _hooks.useStrokeColor(polygon, props.strokeColor!);
+  _hooks.useStrokeOpacity(polygon, props.strokeOpacity!);
+  _hooks.useStrokeStyle(polygon, props.strokeStyle!);
+  _hooks.useZIndex(polygon, props.zIndex!);
 
-  React.useEffect(() => {
-    props.onClick && kakao.maps.event.addListener(polygon, "click", props.onClick);
-    props.onMouseDown && kakao.maps.event.addListener(polygon, "mousedown", props.onMouseDown);
-    props.onMouseMove && kakao.maps.event.addListener(polygon, "mousemove", props.onMouseMove);
-    props.onMouseOut && kakao.maps.event.addListener(polygon, "mouseout", props.onMouseOut);
-    props.onMouseOver && kakao.maps.event.addListener(polygon, "mouseover", props.onMouseOver);
-
-    return () => {
-      props.onClick && kakao.maps.event.removeListener(polygon, "click", props.onClick);
-      props.onMouseDown && kakao.maps.event.removeListener(polygon, "mousedown", props.onMouseDown);
-      props.onMouseMove && kakao.maps.event.removeListener(polygon, "mousemove", props.onMouseMove);
-      props.onMouseOut && kakao.maps.event.removeListener(polygon, "mouseout", props.onMouseOut);
-      props.onMouseOver && kakao.maps.event.removeListener(polygon, "mouseover", props.onMouseOver);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    const path = props.path.map((positions) => {
-      return positions.map((position) => {
-        return new kakao.maps.LatLng(position.lat, position.lng);
-      });
-    });
-    polygon.setPath(path);
-  }, [props.path]);
-
-  React.useEffect(() => {
-    props.fillColor !== undefined ? polygon.setOptions({ fillColor: props.fillColor }) : null;
-  }, [props.fillColor]);
-
-  React.useEffect(() => {
-    props.fillOpacity !== undefined ? polygon.setOptions({ fillOpacity: props.fillOpacity }) : null;
-  }, [props.fillOpacity]);
-
-  React.useEffect(() => {
-    props.strokeWeight !== undefined ? polygon.setOptions({ strokeWeight: props.strokeWeight }) : null;
-  }, [props.strokeWeight]);
-
-  React.useEffect(() => {
-    props.strokeColor !== undefined ? polygon.setOptions({ strokeColor: props.strokeColor }) : null;
-  }, [props.strokeColor]);
-
-  React.useEffect(() => {
-    props.strokeOpacity !== undefined ? polygon.setOptions({ strokeOpacity: props.strokeOpacity }) : null;
-  }, [props.strokeOpacity]);
-
-  React.useEffect(() => {
-    props.strokeStyle !== undefined ? polygon.setOptions({ strokeStyle: props.strokeStyle }) : null;
-  }, [props.strokeStyle]);
-
-  React.useEffect(() => {
-    props.zIndex !== undefined ? polygon.setZIndex(props.zIndex) : null;
-  }, [props.zIndex]);
+  _hooks.useClickEvent(polygon, props.onClick!);
+  _hooks.useMouseMoveEvent(polygon, props.onMouseMove!);
+  _hooks.useMouseDownEvent(polygon, props.onMouseMove!);
+  _hooks.useMouseOverEvent(polygon, props.onMouseOver!);
+  _hooks.useMouseOutEvent(polygon, props.onMouseOut!);
 
   return (
     <PolygonContext.Provider value={{ polygon }}>
       {props.children}
     </PolygonContext.Provider>
   );
+};
+
+Polygon.defaultProps = {
+  fillColor: "transparent",
+  fillOpacity: 1,
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+  onClick: () => undefined,
+  onMouseDown: () => undefined,
+  onMouseMove: () => undefined,
+  onMouseOut: () => undefined,
+  onMouseOver: () => undefined,
 };
 
 export default (() => Polygon)();

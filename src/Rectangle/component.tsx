@@ -1,9 +1,11 @@
-import { IKakao, TKakaoStrokeStyles, IKakaoRectangle, IKakaoMouseEvent } from "tenel-kakao-map";
+import { IKakao, TKakaoStrokeStyles, IKakaoRectangle } from "tenel-kakao-map";
 
 import * as React from "react";
 
 import KakaoMapContext from "../Map/context";
 import RectangleContext from "./context";
+
+import _hooks from "./hooks";
 
 declare var kakao: IKakao;
 
@@ -17,11 +19,11 @@ export interface IKakaoMapsRectangleProps {
   strokeOpacity?: number;
   strokeStyle?: TKakaoStrokeStyles;
   zIndex?: number;
-  onClick?: (e: IKakaoMouseEvent) => void;
-  onMouseDown?: (e: IKakaoMouseEvent) => void;
-  onMouseMove?: (e: IKakaoMouseEvent) => void;
-  onMouseOut?: (e: IKakaoMouseEvent) => void;
-  onMouseOver?: (e: IKakaoMouseEvent) => void;
+  onClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseDown?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
 const Rectangle: React.FunctionComponent<IKakaoMapsRectangleProps> = (props) => {
@@ -31,67 +33,42 @@ const Rectangle: React.FunctionComponent<IKakaoMapsRectangleProps> = (props) => 
     return new kakao.maps.Rectangle();
   });
 
-  React.useEffect(() => {
-    props.onClick && kakao.maps.event.addListener(rectangle, "click", props.onClick);
-    props.onMouseDown && kakao.maps.event.addListener(rectangle, "mousedown", props.onMouseDown);
-    props.onMouseMove && kakao.maps.event.addListener(rectangle, "mousemove", props.onMouseMove);
-    props.onMouseOut && kakao.maps.event.addListener(rectangle, "mouseout", props.onMouseOut);
-    props.onMouseOver && kakao.maps.event.addListener(rectangle, "mouseover", props.onMouseOver);
+  _hooks.useInit(rectangle, mapCtx.map);
+  _hooks.useBounds(rectangle, props.bounds);
+  _hooks.useFillColor(rectangle, props.fillColor!);
+  _hooks.useFillOpacity(rectangle, props.fillOpacity!);
+  _hooks.useStrokeWeight(rectangle, props.strokeWeight!);
+  _hooks.useStrokeColor(rectangle, props.strokeColor!);
+  _hooks.useStrokeOpacity(rectangle, props.strokeOpacity!);
+  _hooks.useStrokeStyle(rectangle, props.strokeStyle!);
+  _hooks.useZIndex(rectangle, props.zIndex!);
 
-    return () => {
-      props.onClick && kakao.maps.event.removeListener(rectangle, "click", props.onClick);
-      props.onMouseDown && kakao.maps.event.removeListener(rectangle, "mousedown", props.onMouseDown);
-      props.onMouseMove && kakao.maps.event.removeListener(rectangle, "mousemove", props.onMouseMove);
-      props.onMouseOut && kakao.maps.event.removeListener(rectangle, "mouseout", props.onMouseOut);
-      props.onMouseOver && kakao.maps.event.removeListener(rectangle, "mouseover", props.onMouseOver);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    rectangle.setMap(mapCtx.map);
-    return () => rectangle.setMap(null);
-  }, []);
-
-  React.useEffect(() => {
-    const sw = new kakao.maps.LatLng(props.bounds[0].lat, props.bounds[0].lng);
-    const ne = new kakao.maps.LatLng(props.bounds[1].lat, props.bounds[1].lng);
-    const bound = new kakao.maps.LatLngBounds(sw, ne);
-    rectangle.setBounds(bound);
-  }, [props.bounds]);
-
-  React.useEffect(() => {
-    props.fillColor !== undefined ? rectangle.setOptions({ fillColor: props.fillColor }) : null;
-  }, [props.fillColor]);
-
-  React.useEffect(() => {
-    props.fillOpacity !== undefined ? rectangle.setOptions({ fillOpacity: props.fillOpacity }) : null;
-  }, [props.fillOpacity]);
-
-  React.useEffect(() => {
-    props.strokeWeight !== undefined ? rectangle.setOptions({ strokeWeight: props.strokeWeight }) : null;
-  }, [props.strokeWeight]);
-
-  React.useEffect(() => {
-    props.strokeColor !== undefined ? rectangle.setOptions({ strokeColor: props.strokeColor }) : null;
-  }, [props.strokeColor]);
-
-  React.useEffect(() => {
-    props.strokeOpacity !== undefined ? rectangle.setOptions({ strokeOpacity: props.strokeOpacity }) : null;
-  }, [props.strokeOpacity]);
-
-  React.useEffect(() => {
-    props.strokeStyle !== undefined ? rectangle.setOptions({ strokeStyle: props.strokeStyle }) : null;
-  }, [props.strokeStyle]);
-
-  React.useEffect(() => {
-    props.zIndex !== undefined ? rectangle.setZIndex(props.zIndex) : null;
-  }, [props.zIndex]);
+  _hooks.useClickEvent(rectangle, props.onClick!);
+  _hooks.useMouseMoveEvent(rectangle, props.onMouseMove!);
+  _hooks.useMouseDownEvent(rectangle, props.onMouseMove!);
+  _hooks.useMouseOverEvent(rectangle, props.onMouseOver!);
+  _hooks.useMouseOutEvent(rectangle, props.onMouseOut!);
 
   return (
     <RectangleContext.Provider value={{ rectangle }}>
       {props.children}
     </RectangleContext.Provider>
   );
+};
+
+Rectangle.defaultProps = {
+  fillColor: "transparent",
+  fillOpacity: 1,
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+  onClick: () => undefined,
+  onMouseDown: () => undefined,
+  onMouseMove: () => undefined,
+  onMouseOut: () => undefined,
+  onMouseOver: () => undefined,
 };
 
 export default (() => Rectangle)();

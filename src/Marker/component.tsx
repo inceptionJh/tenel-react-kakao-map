@@ -1,9 +1,11 @@
-import { IKakao, IKakaoMarker, IKakaoMarkerImageOptions, IKakaoMarkerImage, IKakaoMouseEvent } from "tenel-kakao-map";
+import { IKakao, IKakaoMarker, IKakaoMarkerImageOptions, IKakaoMarkerImage } from "tenel-kakao-map";
 
 import * as React from "react";
 
 import MarkerContext from "./context";
 import KakaoMapContext from "../Map/context";
+
+import _hooks from "./hooks";
 
 declare var kakao: IKakao;
 
@@ -35,12 +37,12 @@ export interface IKakaoMapsMarkerProps {
   range?: number;
   altitude?: number;
   image?: IKakaoMapsMarkerImage;
-  onClick?: (e: IKakaoMouseEvent) => void;
-  onDragStart?: (e: IKakaoMouseEvent) => void;
-  onDragEnd?: (e: IKakaoMouseEvent) => void;
-  onMouseOut?: (e: IKakaoMouseEvent) => void;
-  onMouseOver?: (e: IKakaoMouseEvent) => void;
-  onRightClick?: () => void;
+  onClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onRightClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
+  onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
+  onDragStart?: (e: { position: { lat: number, lng: number } }) => void;
+  onDragEnd?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
 const Marker: React.FunctionComponent<IKakaoMapsMarkerProps> = (props) => {
@@ -70,69 +72,17 @@ const Marker: React.FunctionComponent<IKakaoMapsMarkerProps> = (props) => {
     return null;
   });
 
-  React.useEffect(() => {
-    marker.setMap(mapCtx.map);
-    return () => marker.setMap(null);
-  }, []);
-
-  React.useEffect(() => {
-    props.onClick && kakao.maps.event.addListener(marker, "click", props.onClick);
-    props.onMouseOut && kakao.maps.event.addListener(marker, "mouseout", props.onMouseOut);
-    props.onMouseOver && kakao.maps.event.addListener(marker, "mouseover", props.onMouseOver);
-    props.onRightClick && kakao.maps.event.addListener(marker, "rightclick", props.onRightClick);
-    props.onDragEnd && kakao.maps.event.addListener(marker, "dragend", props.onDragEnd);
-    props.onDragStart && kakao.maps.event.addListener(marker, "dragstart", props.onDragStart);
-
-    return () => {
-      props.onClick && kakao.maps.event.removeListener(marker, "click", props.onClick);
-      props.onDragEnd && kakao.maps.event.removeListener(marker, "dragend", props.onDragEnd);
-      props.onDragStart && kakao.maps.event.removeListener(marker, "dragstart", props.onDragStart);
-      props.onMouseOut && kakao.maps.event.removeListener(marker, "mouseout", props.onMouseOut);
-      props.onMouseOver && kakao.maps.event.removeListener(marker, "mouseover", props.onMouseOver);
-      props.onRightClick && kakao.maps.event.removeListener(marker, "rightclick", props.onRightClick);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    props.clickable !== undefined ? marker.setClickable(props.clickable) : null;
-  }, [props.clickable]);
-
-  React.useEffect(() => {
-    props.draggable !== undefined ? marker.setDraggable(props.draggable) : null;
-  }, [props.draggable]);
-
-  React.useEffect(() => {
-    props.title !== undefined ? marker.setTitle(props.title) : null;
-  }, [props.title]);
-
-  React.useEffect(() => {
-    props.opacity !== undefined ? marker.setOpacity(props.opacity) : null;
-  }, [props.opacity]);
-
-  React.useEffect(() => {
-    props.range !== undefined ? marker.setRange(props.range) : null;
-  }, [props.range]);
-
-  React.useEffect(() => {
-    props.visible !== undefined ? marker.setVisible(props.visible) : null;
-  }, [props.visible]);
-
-  React.useEffect(() => {
-    props.zIndex !== undefined ? marker.setZIndex(props.zIndex) : null;
-  }, [props.zIndex]);
-
-  React.useEffect(() => {
-    props.altitude !== undefined ? marker.setAltitude(props.altitude) : null;
-  }, [props.altitude]);
-
-  React.useEffect(() => {
-    const latlng = new kakao.maps.LatLng(props.position.lat, props.position.lng);
-    marker.setPosition(latlng);
-  }, [props.position, props.position.lat, props.position.lng]);
-
-  React.useEffect(() => {
-    markerImage !== null ? marker?.setImage(markerImage) : null;
-  }, [markerImage]);
+  _hooks.useInit(marker, mapCtx.map);
+  _hooks.usePosition(marker, props.position);
+  _hooks.useClickable(marker, props.clickable!);
+  _hooks.useDraggable(marker, props.draggable!);
+  _hooks.useVisible(marker, props.visible!);
+  _hooks.useTitle(marker, props.title!);
+  _hooks.useOpacity(marker, props.opacity!);
+  _hooks.useRange(marker, props.range!);
+  _hooks.useAltitude(marker, props.range!);
+  _hooks.useZIndex(marker, props.zIndex!);
+  _hooks.useMarkerImage(marker, markerImage!);
 
   return (
     <MarkerContext.Provider value={{ marker }}>
