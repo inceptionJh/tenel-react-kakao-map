@@ -1,4 +1,4 @@
-import { IKakao, IKakaoMouseEvent, IKakaoCopyrightPosition } from "tenel-kakao-map";
+import { IKakao, IKakaoCopyrightPosition, TKakaoMapTypeIdKey } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -11,7 +11,7 @@ declare var kakao: IKakao;
 export interface IKakaoMapsMapProps {
   container: HTMLElement;
   center: { lat: number, lng: number };
-  overlayMapTypes?: (keyof typeof kakao.maps.MapTypeId)[];
+  overlayMapTypes?: TKakaoMapTypeIdKey[];
   cursor?: string;
   draggable?: boolean;
   zoomable?: boolean;
