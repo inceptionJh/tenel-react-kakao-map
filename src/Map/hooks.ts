@@ -1,4 +1,4 @@
-import { IKakao, IKakaoMap, IKakaoCopyrightPosition } from "tenel-kakao-map";
+import { IKakao, IKakaoMap, IKakaoCopyrightPosition, IKakaoMouseEvent } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -22,10 +22,9 @@ const useMouseMoveEvent = (
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onMouseMove = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
+    const onMouseMove = (event: IKakaoMouseEvent) => {
+      const lat = event.latLng.getLat();
+      const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
@@ -41,10 +40,9 @@ const useClickEvent = (
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onClick = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
+    const onClick = (event: IKakaoMouseEvent) => {
+      const lat = event.latLng.getLat();
+      const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
@@ -60,10 +58,9 @@ const useDoubleClickEvent = (
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onDoubleClick = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
+    const onDoubleClick = (event: IKakaoMouseEvent) => {
+      const lat = event.latLng.getLat();
+      const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
@@ -76,16 +73,11 @@ const useDoubleClickEvent = (
 
 const useRightClickEvent = (
   map: IKakaoMap,
-  callback: (e: { position: { lat: number, lng: number } }) => void,
+  callback: () => void,
 ) => {
   React.useEffect(() => {
     const onRightClick = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
-      const position = { lat, lng };
-      const e = { position };
-      callback(e);
+      callback();
     };
     kakao.maps.event.addListener(map, "rightclick", onRightClick);
 

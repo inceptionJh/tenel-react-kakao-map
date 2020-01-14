@@ -36,7 +36,7 @@ export interface IKakaoMapsMapProps {
   onIdle?: () => void;
   onBoundsChanged?: () => void;
   onClick?: (e: { position: { lat: number, lng: number } }) => void;
-  onRightClick?: (e: { position: { lat: number, lng: number } }) => void;
+  onRightClick?: () => void;
   onDoubleClick?: (e: { position: { lat: number, lng: number } }) => void;
   onDrag?: (e: { position: { lat: number, lng: number } }) => void;
   onDragEnd?: (e: { position: { lat: number, lng: number } }) => void;
