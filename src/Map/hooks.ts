@@ -1,4 +1,4 @@
-import { IKakao, IKakaoMap, IKakaoCopyrightPosition, IKakaoMouseEvent } from "tenel-kakao-map";
+import { IKakao, IKakaoMap, IKakaoCopyrightPosition, IKakaoMouseEvent, TKakaoOverayMapTypeIdKey, TKakaoBaseMapTypeIdKey } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -229,7 +229,13 @@ const useBounds = (
   }, [bounds]);
 };
 
-const useOverlayMapTypes = (map: IKakaoMap, overlayMapTypes: (keyof typeof kakao.maps.MapTypeId)[]) => {
+const useBaseMapTypes = (map: IKakaoMap, baseMapType: TKakaoBaseMapTypeIdKey) => {
+  React.useEffect(() => {
+    map.setMapTypeId(kakao.maps.MapTypeId[baseMapType]);
+  }, [baseMapType]);
+};
+
+const useOverlayMapTypes = (map: IKakaoMap, overlayMapTypes: TKakaoOverayMapTypeIdKey[]) => {
   const [prevOverlayMapTypes, setPrevOverlayMapTypes] = React.useState(overlayMapTypes);
 
   React.useEffect(() => {
@@ -269,5 +275,6 @@ export default {
   useCursor,
   useCopyright,
   useBounds,
+  useBaseMapTypes,
   useOverlayMapTypes,
 };

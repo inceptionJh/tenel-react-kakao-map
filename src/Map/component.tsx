@@ -1,4 +1,4 @@
-import { IKakao, IKakaoCopyrightPosition, TKakaoMapTypeIdKey } from "tenel-kakao-map";
+import { IKakao, IKakaoCopyrightPosition, TKakaoOverayMapTypeIdKey, TKakaoBaseMapTypeIdKey } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -11,7 +11,8 @@ declare var kakao: IKakao;
 export interface IKakaoMapsMapProps {
   container: HTMLElement;
   center: { lat: number, lng: number };
-  overlayMapTypes?: TKakaoMapTypeIdKey[];
+  baseMapType?: TKakaoBaseMapTypeIdKey;
+  overlayMapTypes?: TKakaoOverayMapTypeIdKey[];
   cursor?: string;
   draggable?: boolean;
   zoomable?: boolean;
@@ -68,6 +69,7 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   _hooks.useCursor(map, props.cursor);
   _hooks.useBounds(map, props.bounds!);
   _hooks.useCopyright(map, props.copyright!);
+  _hooks.useBaseMapTypes(map, props.baseMapType!);
   _hooks.useOverlayMapTypes(map, props.overlayMapTypes!);
 
   _hooks.useZoom(map, props.zoomable!, props.minLevel!, props.maxLevel!, props.level!, props.levelDuration!);
@@ -96,6 +98,7 @@ KakaoMap.defaultProps = {
   minLevel: 1,
   maxLevel: 14,
   levelDuration: 300,
+  baseMapType: "ROADMAP",
   overlayMapTypes: [],
   onDrag: () => undefined,
   onDragEnd: () => undefined,
