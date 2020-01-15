@@ -11,14 +11,18 @@ const useInit = (polygon: IKakaoPolygon, map: IKakaoMap) => {
   }, []);
 };
 
-const usePath = (polygon: IKakaoPolygon, path: { lat: number, lng: number }[][]) => {
+const usePath = (polygon: IKakaoPolygon, pathOrPaths: { lat: number, lng: number }[][] | { lat: number, lng: number }[]) => {
   React.useEffect(() => {
-    polygon.setPath(path.map((positions) => {
-      return positions.map((position) => {
-        return new kakao.maps.LatLng(position.lat, position.lng);
-      });
+    polygon.setPath((pathOrPaths as any).map((positionOrPath: { lat: number, lng: number } | { lat: number, lng: number }[]) => {
+      if ("lat" in positionOrPath) {
+        return new kakao.maps.LatLng(positionOrPath.lat, positionOrPath.lng);
+      } else {
+        return positionOrPath.map((position) => {
+          return new kakao.maps.LatLng(position.lat, position.lng);
+        });
+      }
     }));
-  }, [path]);
+  }, [pathOrPaths]);
 };
 
 const useFillColor = (polygon: IKakaoPolygon, fillColor: string) => {

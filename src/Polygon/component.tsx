@@ -1,4 +1,4 @@
-import { IKakao, TKakaoStrokeStyles, IKakaoPolygon, IKakaoMouseEvent } from "tenel-kakao-map";
+import { IKakao, TKakaoStrokeStyles, IKakaoPolygon } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -11,7 +11,7 @@ declare var kakao: IKakao;
 
 export interface IKakaoMapsPolygonProps {
   className?: string;
-  path: { lat: number, lng: number }[][];
+  path: { lat: number, lng: number }[][] | { lat: number, lng: number }[];
   fillColor?: string;
   fillOpacity?: number;
   strokeWeight?: number;
