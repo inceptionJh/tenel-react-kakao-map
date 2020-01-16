@@ -12,7 +12,7 @@ declare var kakao: IKakao;
 export interface IKakaoMapsCustomOverlayProps {
   className?: string;
   position: { lat: number, lng: number };
-  content: HTMLElement;
+  content: HTMLElement | string;
   clickable?: boolean;
   xAnchor?: number;
   yAnchor?: number;

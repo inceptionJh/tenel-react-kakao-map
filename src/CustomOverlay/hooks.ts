@@ -18,7 +18,7 @@ const usePosition = (ellipse: IKakaoCustomOverlay, position: { lat: number, lng:
   }, [position]);
 };
 
-const useContent = (ellipse: IKakaoCustomOverlay, content: HTMLElement) => {
+const useContent = (ellipse: IKakaoCustomOverlay, content: HTMLElement | string) => {
   React.useEffect(() => {
     ellipse.setContent(content);
   }, [content]);
