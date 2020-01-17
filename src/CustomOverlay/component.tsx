@@ -25,7 +25,7 @@ const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (pr
   const mapCtx = React.useContext(KakaoMapContext);
 
   const [customOverlay] = React.useState<IKakaoCustomOverlay>(() => {
-    return new kakao.maps.CustomOverlay({ clickable: props.clickable });
+    return new kakao.maps.CustomOverlay({ clickable: props.clickable, xAnchor: props.xAnchor, yAnchor: props.yAnchor });
   });
 
   _hooks.useInit(customOverlay, mapCtx.map);
