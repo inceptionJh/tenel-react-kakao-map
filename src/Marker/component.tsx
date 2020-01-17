@@ -91,4 +91,20 @@ const Marker: React.FunctionComponent<IKakaoMapsMarkerProps> = (props) => {
   );
 };
 
+Marker.defaultProps = {
+  opacity: 1,
+  visible: true,
+  range: 500,
+  zIndex: 0,
+  altitude: 2,
+  clickable: true,
+  draggable: false,
+  onClick: () => undefined,
+  onDragEnd: () => undefined,
+  onMouseOut: () => undefined,
+  onMouseOver: () => undefined,
+  onRightClick: () => undefined,
+  onDragStart: () => undefined,
+};
+
 export default (() => Marker)();
