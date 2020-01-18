@@ -77,7 +77,8 @@ const useClickEvent = (
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onClick = ({ latLng }: IKakaoMouseEvent) => {
+    const onClick = () => {
+      const latLng = marker.getPosition();
       const lat = latLng.getLat();
       const lng = latLng.getLng();
       const position = { lat, lng };
@@ -90,12 +91,32 @@ const useClickEvent = (
   }, []);
 };
 
+const useRightClickEvent = (
+  marker: IKakaoMarker,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onClick = () => {
+      const latLng = marker.getPosition();
+      const lat = latLng.getLat();
+      const lng = latLng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(marker, "rightclick", onClick);
+
+    return () => kakao.maps.event.removeListener(marker, "rightclick", onClick);
+  }, []);
+};
+
 const useMouseOverEvent = (
   marker: IKakaoMarker,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onMouseOver = ({ latLng }: IKakaoMouseEvent) => {
+    const onMouseOver = () => {
+      const latLng = marker.getPosition();
       const lat = latLng.getLat();
       const lng = latLng.getLng();
       const position = { lat, lng };
@@ -113,7 +134,8 @@ const useMouseOutEvent = (
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onMouseOut = ({ latLng }: IKakaoMouseEvent) => {
+    const onMouseOut = () => {
+      const latLng = marker.getPosition();
       const lat = latLng.getLat();
       const lng = latLng.getLng();
       const position = { lat, lng };
@@ -123,6 +145,44 @@ const useMouseOutEvent = (
     kakao.maps.event.addListener(marker, "mouseout", onMouseOut);
 
     return () => kakao.maps.event.removeListener(marker, "mouseout", onMouseOut);
+  }, []);
+};
+
+const useDragStartEvent = (
+  marker: IKakaoMarker,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onDragStart = () => {
+      const latLng = marker.getPosition();
+      const lat = latLng.getLat();
+      const lng = latLng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(marker, "dragstart", onDragStart);
+
+    return () => kakao.maps.event.removeListener(marker, "dragstart", onDragStart);
+  }, []);
+};
+
+const useDragEndEvent = (
+  marker: IKakaoMarker,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onDragEnd = () => {
+      const latLng = marker.getPosition();
+      const lat = latLng.getLat();
+      const lng = latLng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(marker, "dragend", onDragEnd);
+
+    return () => kakao.maps.event.removeListener(marker, "dragend", onDragEnd);
   }, []);
 };
 
@@ -139,6 +199,9 @@ export default {
   useZIndex,
   useMarkerImage,
   useClickEvent,
+  useRightClickEvent,
   useMouseOverEvent,
   useMouseOutEvent,
+  useDragStartEvent,
+  useDragEndEvent,
 };

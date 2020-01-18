@@ -4,3 +4,5 @@ node_modules
 dist
 build
 _test
+stories/_lib
+storybook-build

@@ -5,7 +5,9 @@
   "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel _test/index.html --open"
+    "start": "parcel _test/index.html",
+    "storybook": "start-storybook -p 3000",
+    "build-storybook": "build-storybook -c .storybook -o storybook-build"
   },
   "keywords": [
     "react-kakao-map"
@@ -26,8 +28,16 @@
     "react-dom": "^16.12.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.3",
+    "@storybook/addon-actions": "^5.3.5",
+    "@storybook/addon-console": "^1.2.1",
+    "@storybook/addon-knobs": "^5.3.5",
+    "@storybook/addon-notes": "^5.3.5",
+    "@storybook/addons": "^5.3.5",
+    "@storybook/react": "^5.3.5",
     "@types/react": "^16.9.13",
     "@types/react-dom": "^16.9.4",
+    "babel-loader": "^8.0.6",
     "parcel-bundler": "^1.12.4",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",

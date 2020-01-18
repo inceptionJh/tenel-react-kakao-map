@@ -84,6 +84,13 @@ const Marker: React.FunctionComponent<IKakaoMapsMarkerProps> = (props) => {
   _hooks.useZIndex(marker, props.zIndex!);
   _hooks.useMarkerImage(marker, markerImage!);
 
+  _hooks.useClickEvent(marker, props.onClick!);
+  _hooks.useRightClickEvent(marker, props.onRightClick!);
+  _hooks.useMouseOverEvent(marker, props.onMouseOver!);
+  _hooks.useMouseOutEvent(marker, props.onMouseOut!);
+  _hooks.useDragStartEvent(marker, props.onDragStart!);
+  _hooks.useDragEndEvent(marker, props.onDragEnd!);
+
   return (
     <MarkerContext.Provider value={{ marker }}>
       {props.children}
