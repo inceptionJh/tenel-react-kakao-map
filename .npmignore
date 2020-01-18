@@ -9,9 +9,9 @@ test
 dist
 .vscode
 _test
+docs
 
 # storybook
 .storybook
-storybook-build
 stories
 tsconfig.storybook.json

@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel _test/index.html",
     "storybook": "start-storybook -p 3000",
-    "build-storybook": "build-storybook -c .storybook -o storybook-build"
+    "build-storybook": "build-storybook -c .storybook -o docs"
   },
   "keywords": [
     "react-kakao-map"
