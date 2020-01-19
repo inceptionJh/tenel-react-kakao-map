@@ -1,6 +1,6 @@
 # tenel-react-kakao-map
 
-[깃허브](https://github.com/inceptionJh/tenel-react-kakao-map) | [버그 리포트](https://github.com/inceptionJh/tenel-react-kakao-map/issues)
+[스토리북](https://inceptionjh.github.io/tenel-react-kakao-map/) | [깃허브](https://github.com/inceptionJh/tenel-react-kakao-map) | [버그 리포트](https://github.com/inceptionJh/tenel-react-kakao-map/issues)
 
 # Installation
 ```
