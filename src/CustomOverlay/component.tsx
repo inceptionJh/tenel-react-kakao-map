@@ -2,6 +2,8 @@ import { IKakao, IKakaoCustomOverlay } from "tenel-kakao-map";
 
 import * as React from "react";
 
+import PropTypes from "prop-types";
+
 import KakaoMapContext from "../Map/context";
 import CustomOverlayContext from "./context";
 
@@ -17,7 +19,9 @@ export interface IKakaoMapsCustomOverlayProps {
   xAnchor?: number;
   yAnchor?: number;
   zIndex?: number;
+  /** 단위 : m */
   altitude?: number;
+  /** 단위 : m */
   range?: number;
 }
 
@@ -47,8 +51,29 @@ CustomOverlay.defaultProps = {
   xAnchor: 0.5,
   yAnchor: 0.5,
   zIndex: 0,
-  altitude: 2,
   range: 500,
+  altitude: 2,
 };
 
-export default (() => CustomOverlay)();
+CustomOverlay.propTypes = {
+  /** 맵에 표시될 좌표 */
+  position: PropTypes.shape({
+    lat: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired,
+  }).isRequired,
+  /** 컨텐츠의 x축 위치 ( 0 ~ 1 ) */
+  xAnchor: PropTypes.number,
+  /** 컨텐츠의 y축 위치 ( 0 ~ 1 ) */
+  yAnchor: PropTypes.number,
+  /** 클릭 가능 여부 */
+  clickable: PropTypes.bool,
+  /** z-index 속성 값 */
+  zIndex: PropTypes.number,
+  /** 표시될 최대 거리 ( 로드맵 only ) */
+  range: PropTypes.number,
+  /** 고도 ( 로드맵 only ) */
+  altitude: PropTypes.number,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+};
+
+export default CustomOverlay;

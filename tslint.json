@@ -13,7 +13,10 @@
         "object-literal-sort-keys": false,
         "ordered-imports": false,
         "no-unused-expression": false,
-        "array-type": false
+        "array-type": false,
+        "only-arrow-functions": false,
+        "object-literal-shorthand": false,
+        "space-before-function-paren": false
     },
     "rulesDirectory": []
 }

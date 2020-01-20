@@ -4,13 +4,16 @@ import { number, color, select } from "@storybook/addon-knobs";
 
 import KakaoMaps from "../_lib";
 
-export default { title: "Circle" };
+export default {
+  title: "Circle",
+  component: KakaoMaps.Circle,
+};
 
-export const basic = () => {
+export const Basic = () => {
   const [container, setContainer] = React.useState();
 
   return (
-    <div ref={(ref) => setContainer(ref)} style={{ width: 700, height: 700 }}>
+    <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
       {container ? (
         <KakaoMaps.Map
           container={container}

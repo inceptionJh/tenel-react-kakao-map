@@ -2,6 +2,8 @@ import { IKakao, IKakaoCopyrightPosition, TKakaoOverayMapTypeIdKey, TKakaoBaseMa
 
 import * as React from "react";
 
+import PropTypes from "prop-types";
+
 import KakaoMapContext from "./context";
 
 import _hooks from "./hooks";
@@ -100,15 +102,91 @@ KakaoMap.defaultProps = {
   levelDuration: 300,
   baseMapType: "ROADMAP",
   overlayMapTypes: [],
-  onDrag: () => undefined,
-  onDragEnd: () => undefined,
-  onDragStart: () => undefined,
-  onMouseMove: () => undefined,
-  onClick: () => undefined,
-  onDoubleClick: () => undefined,
-  onRightClick: () => undefined,
-  onZoomStart: () => undefined,
-  onZoomChange: () => undefined,
+  onDrag: function () { },
+  onDragEnd: function () { },
+  onDragStart: function () { },
+  onMouseMove: function () { },
+  onClick: function () { },
+  onDoubleClick: function () { },
+  onRightClick: function () { },
+  onZoomStart: function () { },
+  onZoomChange: function () { },
 };
 
-export default (() => KakaoMap)();
+const Position = PropTypes.shape({
+  lat: PropTypes.number.isRequired,
+  lng: PropTypes.number.isRequired,
+}).isRequired;
+
+KakaoMap.propTypes = {
+  /** 지도가 표시될 HTML element */
+  container: PropTypes.instanceOf(HTMLElement).isRequired,
+  /** 지도의 중심 좌표 */
+  center: Position,
+  /** 커서 모양 */
+  cursor: PropTypes.string,
+  /** 최대 확대/축소 수준 */
+  maxLevel: PropTypes.number,
+  /** 최소 확대/축소 수준 */
+  minLevel: PropTypes.number,
+  /** 확대/축소 수준 */
+  level: PropTypes.number,
+  /** 확대/축소 트렌지션 시간 ( 단위 : ms ) */
+  levelDuration: PropTypes.number,
+  /** 지도의 타입을 설정 */
+  baseMapType: PropTypes.oneOf(["ROADMAP", "SKYVIEW", "HYBRID"]),
+  /** 지도에 오버레이할 타입을 설정 */
+  overlayMapTypes: PropTypes.arrayOf(PropTypes.oneOf(["OVERLAY", "ROADVIEW", "TRAFFIC", "TERRAIN", "BICYCLE", "BICYCLE_HYBRID", "USE_DISTRICT"] as const).isRequired),
+  /** 확대/축소 가능 여부 */
+  zoomable: PropTypes.bool,
+  /** 드래그 가능 여부 */
+  draggable: PropTypes.bool,
+  /** Copyright 위치 및 반전 */
+  copyright: PropTypes.shape({
+    position: PropTypes.oneOf(["BOTTOMLEFT", "BOTTOMRIGHT"] as const).isRequired,
+    reverse: PropTypes.bool,
+  }),
+  /** 주어진 영역이 화면 안에 전부 나타날 수 있도록 지도의 중심 좌표와 확대 수준을 설정 */
+  bounds: PropTypes.shape({
+    value: PropTypes.arrayOf(Position).isRequired as PropTypes.Validator<[
+      PropTypes.InferProps<{
+        lat: PropTypes.Validator<number>;
+        lng: PropTypes.Validator<number>;
+      }>,
+      PropTypes.InferProps<{
+        lat: PropTypes.Validator<number>;
+        lng: PropTypes.Validator<number>;
+      }>
+    ]>,
+    paddingTop: PropTypes.number,
+    paddingRight: PropTypes.number,
+    paddingBottom: PropTypes.number,
+    paddingLeft: PropTypes.number,
+  }),
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDoubleClick: PropTypes.func,
+  /** () => void */
+  onRightClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseMove: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDrag: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDragStart: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDragEnd: PropTypes.func,
+  /** (e: { zoomLevel: number }) => void */
+  onZoomStart: PropTypes.func,
+  /** (e: { zoomLevel: number }) => void */
+  onZoomChange: PropTypes.func,
+  /** () => void */
+  onIdle: PropTypes.func,
+  /** () => void */
+  onBoundsChanged: PropTypes.func,
+  /** () => void */
+  onTilesLoaded: PropTypes.func,
+};
+
+export default KakaoMap;

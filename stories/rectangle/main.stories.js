@@ -1,16 +1,19 @@
 import React from "react";
 
-import { number, color, select } from "@storybook/addon-knobs";
+import { number, color, select, object } from "@storybook/addon-knobs";
 
 import KakaoMaps from "../_lib";
 
-export default { title: "Rectangle" };
+export default {
+  title: "Rectangle",
+  component: KakaoMaps.Rectangle,
+};
 
-export const basic = () => {
+export const Basic = () => {
   const [container, setContainer] = React.useState();
 
   return (
-    <div ref={(ref) => setContainer(ref)} style={{ width: 700, height: 700 }}>
+    <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
       {container ? (
         <KakaoMaps.Map
           container={container}
@@ -18,14 +21,14 @@ export const basic = () => {
         >
           <KakaoMaps.Rectangle
             bounds={[
-              {
-                lat: number("bounds.sw.lat", 33.450701 - 0.002),
-                lng: number("bounds.sw.lng", 126.570667 - 0.002)
-              },
-              {
-                lat: number("bounds.ne.lat", 33.450701 + 0.002),
-                lng: number("bounds.ne.lng", 126.570667 + 0.002)
-              }
+              object("bounds[0] : 남서쪽 좌표", {
+                lat: 33.450701 - 0.001,
+                lng: 126.570667 - 0.001
+              }),
+              object("bounds[1] : 북동쪽 좌표", {
+                lat: 33.450701 + 0.001,
+                lng: 126.570667 + 0.001
+              }),
             ]}
             fillColor={color("fillColor", "#fa7")}
             fillOpacity={number("fillOpacity", 0.2, { min: 0, max: 1, range: true, step: 0.01 })}

@@ -2,6 +2,8 @@ import { IKakao, IKakaoCircle, TKakaoStrokeStyles } from "tenel-kakao-map";
 
 import * as React from "react";
 
+import PropTypes from "prop-types";
+
 import KakaoMapContext from "../Map/context";
 import CircleContext from "./context";
 
@@ -12,9 +14,11 @@ declare var kakao: IKakao;
 export interface IKakaoMapsCircleProps {
   className?: string;
   center: { lat: number, lng: number };
+  /** 단위 : m */
   radius?: number;
   fillColor?: string;
   fillOpacity?: number;
+  /** 단위 : px */
   strokeWeight?: number;
   strokeColor?: string;
   strokeOpacity?: number;
@@ -67,11 +71,45 @@ Circle.defaultProps = {
   strokeOpacity: 1,
   strokeStyle: "solid",
   zIndex: 0,
-  onClick: () => undefined,
-  onMouseDown: () => undefined,
-  onMouseMove: () => undefined,
-  onMouseOut: () => undefined,
-  onMouseOver: () => undefined,
+  onClick: function () { },
+  onMouseDown: function () { },
+  onMouseMove: function () { },
+  onMouseOut: function () { },
+  onMouseOver: function () { },
 };
 
-export default (() => Circle)();
+Circle.propTypes = {
+  /** 맵에 표시될 좌표 */
+  center: PropTypes.shape({
+    lat: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired,
+  }).isRequired,
+  /** 단위 : m */
+  radius: PropTypes.number,
+  /** 채움 색 */
+  fillColor: PropTypes.string,
+  /** 채움 색의 불투명도 ( 0 ~ 1 ) */
+  fillOpacity: PropTypes.number,
+  /** 채움 색 */
+  strokeColor: PropTypes.string,
+  /** 채움 불투명도 ( 0 ~ 1 ) */
+  strokeOpacity: PropTypes.number,
+  /** 선의 두께 ( 단위 : px ) */
+  strokeWeight: PropTypes.number,
+  /** 선 스타일 */
+  strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
+  /** z-index 속성 값 */
+  zIndex: PropTypes.number,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseDown: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseMove: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOver: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOut: PropTypes.func,
+};
+
+export default Circle;

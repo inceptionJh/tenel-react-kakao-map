@@ -4,20 +4,23 @@ import { number, color, select } from "@storybook/addon-knobs";
 
 import KakaoMaps from "../_lib";
 
-export default { title: "Ellipse" };
+export default {
+  title: "Ellipse",
+  component: KakaoMaps.Ellipse,
+};
 
-export const basic = () => {
+export const Basic = () => {
   const [container, setContainer] = React.useState();
 
   return (
-    <div ref={(ref) => setContainer(ref)} style={{ width: 700, height: 700 }}>
+    <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
       {container ? (
         <KakaoMaps.Map
           container={container}
           center={{ lat: 33.450701, lng: 126.570667 }}
         >
           <KakaoMaps.Ellipse
-            position={{ lat: number("center.latitude", 33.450701), lng: number("center.longitude", 126.570667) }}
+            position={{ lat: number("position.latitude", 33.450701), lng: number("position.longitude", 126.570667) }}
             rx={number("rx", 100) || 0}
             ry={number("ry", 50) || 0}
             fillColor={color("fillColor", "#fa7")}

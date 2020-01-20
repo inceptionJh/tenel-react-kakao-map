@@ -6,13 +6,16 @@ import KakaoMaps from "../_lib";
 
 import react from "./react.png";
 
-export default { title: "Marker" };
+export default {
+  title: "Marker",
+  component: KakaoMaps.Marker,
+};
 
-export const basic = () => {
+export const Basic = () => {
   const [container, setContainer] = React.useState();
 
   return (
-    <div ref={(ref) => setContainer(ref)} style={{ width: 700, height: 700 }}>
+    <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
       {container ? (
         <KakaoMaps.Map
           container={container}
@@ -36,11 +39,11 @@ export const basic = () => {
   );
 };
 
-export const image = () => {
+export const Image = () => {
   const [container, setContainer] = React.useState();
 
   return (
-    <div ref={(ref) => setContainer(ref)} style={{ width: 700, height: 700 }}>
+    <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
       {container ? (
         <KakaoMaps.Map
           container={container}

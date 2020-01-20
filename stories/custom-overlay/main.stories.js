@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import ReactDOMServer from "react-dom/server"
+import React from "react";
 
 import { number, boolean } from "@storybook/addon-knobs";
 
 import KakaoMaps from "../_lib";
 
-export default { title: "CustomOverlay" };
+export default {
+  title: "CustomOverlay",
+  component: KakaoMaps.CustomOverlay,
+};
 
 const content = document.createElement("div");
 content.textContent = "custom overlay";
@@ -21,11 +23,11 @@ content.style = `
   box-shadow: 0 0 5px 0 #000;
 `;
 
-export const basic = () => {
+export const Basic = () => {
   const [container, setContainer] = React.useState();
 
   return (
-    <div ref={(ref) => setContainer(ref)} style={{ width: 700, height: 700 }}>
+    <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
       {container ? (
         <KakaoMaps.Map
           container={container}
@@ -48,5 +50,3 @@ export const basic = () => {
     </div >
   );
 };
-
-// TODO
