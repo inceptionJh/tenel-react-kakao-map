@@ -259,6 +259,26 @@ const useOverlayMapTypes = (map: IKakaoMap, overlayMapTypes: TKakaoOverayMapType
   }, [overlayMapTypes]);
 };
 
+const useIdleEvent = (
+  map: IKakaoMap,
+  callback: (e: { zoomLevel: number, position: { lat: number, lng: number } }) => void,
+) => {
+  React.useEffect(() => {
+    const onIdle = () => {
+      const latlng = map.getCenter();
+      const lat = latlng.getLat();
+      const lng = latlng.getLng();
+      const position = { lat, lng };
+      const zoomLevel = map.getLevel();
+      const e = { zoomLevel, position };
+      callback(e);
+    };
+    kakao.maps.event.addListener(map, "idle", onIdle);
+
+    return () => kakao.maps.event.removeListener(map, "idle", onIdle);
+  }, []);
+};
+
 export default {
   useCenter,
   useDrag,
@@ -277,4 +297,5 @@ export default {
   useBounds,
   useBaseMapTypes,
   useOverlayMapTypes,
+  useIdleEvent,
 };

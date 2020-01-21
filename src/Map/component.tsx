@@ -36,7 +36,7 @@ export interface IKakaoMapsMapProps {
   onZoomStart?: (e: { zoomLevel: number }) => void;
   onZoomChange?: (e: { zoomLevel: number }) => void;
   onTilesLoaded?: () => void;
-  onIdle?: () => void;
+  onIdle?: (e: { zoomLevel: number, position: { lat: number, lng: number } }) => void;
   onBoundsChanged?: () => void;
   onClick?: (e: { position: { lat: number, lng: number } }) => void;
   onRightClick?: () => void;
@@ -56,12 +56,10 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
 
   React.useEffect(() => {
     props.onTilesLoaded && kakao.maps.event.addListener(map, "tilesloaded", props.onTilesLoaded);
-    props.onIdle && kakao.maps.event.addListener(map, "idle", props.onIdle);
     props.onBoundsChanged && kakao.maps.event.addListener(map, "bounds_changed", props.onBoundsChanged);
 
     return () => {
       props.onTilesLoaded && kakao.maps.event.removeListener(map, "tilesloaded", props.onTilesLoaded);
-      props.onIdle && kakao.maps.event.removeListener(map, "idle", props.onIdle);
       props.onBoundsChanged && kakao.maps.event.removeListener(map, "bounds_changed", props.onBoundsChanged);
     };
   }, []);
@@ -84,6 +82,8 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   _hooks.useClickEvent(map, props.onClick!);
   _hooks.useDoubleClickEvent(map, props.onDoubleClick!);
   _hooks.useRightClickEvent(map, props.onRightClick!);
+
+  _hooks.useIdleEvent(map, props.onIdle!);
 
   return (
     <KakaoMapContext.Provider value={{ map }}>
@@ -111,6 +111,7 @@ KakaoMap.defaultProps = {
   onRightClick: function () { },
   onZoomStart: function () { },
   onZoomChange: function () { },
+  onIdle: function () { },
 };
 
 const Position = PropTypes.shape({
@@ -181,7 +182,7 @@ KakaoMap.propTypes = {
   onZoomStart: PropTypes.func,
   /** (e: { zoomLevel: number }) => void */
   onZoomChange: PropTypes.func,
-  /** () => void */
+  /** (e: { zoomLevel: number, position: { lat: number, lng: number } }) => void */
   onIdle: PropTypes.func,
   /** () => void */
   onBoundsChanged: PropTypes.func,
