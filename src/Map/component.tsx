@@ -35,9 +35,6 @@ export interface IKakaoMapsMapProps {
   };
   onZoomStart?: (e: { zoomLevel: number }) => void;
   onZoomChange?: (e: { zoomLevel: number }) => void;
-  onTilesLoaded?: () => void;
-  onIdle?: (e: { zoomLevel: number, position: { lat: number, lng: number } }) => void;
-  onBoundsChanged?: () => void;
   onClick?: (e: { position: { lat: number, lng: number } }) => void;
   onRightClick?: () => void;
   onDoubleClick?: (e: { position: { lat: number, lng: number } }) => void;
@@ -45,6 +42,16 @@ export interface IKakaoMapsMapProps {
   onDragEnd?: (e: { position: { lat: number, lng: number } }) => void;
   onDragStart?: (e: { position: { lat: number, lng: number } }) => void;
   onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
+  onTilesLoaded?: () => void;
+  onBoundsChanged?: () => void;
+  onIdle?: (e: {
+    zoomLevel: number,
+    position: { lat: number, lng: number },
+    bounds: [
+      { lat: number, lng: number },
+      { lat: number, lng: number },
+    ],
+  }) => void;
 }
 
 const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
@@ -182,7 +189,7 @@ KakaoMap.propTypes = {
   onZoomStart: PropTypes.func,
   /** (e: { zoomLevel: number }) => void */
   onZoomChange: PropTypes.func,
-  /** (e: { zoomLevel: number, position: { lat: number, lng: number } }) => void */
+  /** (e: { zoomLevel: number, position: { lat: number, lng: number }, bounds: [{lat: number, lng: number}, {lat: number, lng: number}] }) => void */
   onIdle: PropTypes.func,
   /** () => void */
   onBoundsChanged: PropTypes.func,
