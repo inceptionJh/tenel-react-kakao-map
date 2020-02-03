@@ -283,7 +283,7 @@ const useIdleEvent = (
       const swLat = sw.getLat();
       const swLng = sw.getLng();
 
-      const bounds = [{ lat: neLat, lng: neLng }, { lat: swLat, lng: swLng }] as [{ lat: number, lng: number }, { lat: number, lng: number }];
+      const bounds = [{ lat: swLat, lng: swLng }, { lat: neLat, lng: neLng }] as [{ lat: number, lng: number }, { lat: number, lng: number }];
 
       const zoomLevel = map.getLevel();
 
