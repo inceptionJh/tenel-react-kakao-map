@@ -44,6 +44,7 @@ export interface IKakaoMapsMapProps {
   onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
   onTilesLoaded?: () => void;
   onBoundsChanged?: () => void;
+  /** bounds: [sw, ne] */
   onIdle?: (e: {
     zoomLevel: number,
     position: { lat: number, lng: number },
@@ -64,6 +65,15 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   React.useEffect(() => {
     props.onTilesLoaded && kakao.maps.event.addListener(map, "tilesloaded", props.onTilesLoaded);
     props.onBoundsChanged && kakao.maps.event.addListener(map, "bounds_changed", props.onBoundsChanged);
+
+    const zoomLevel = map.getLevel();
+    const position = { lat: map.getCenter().getLat(), lng: map.getCenter().getLng() };
+    const bounds = [
+      { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
+      { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
+    ] as [{ lat: number, lng: number }, { lat: number, lng: number }];
+    const e = { zoomLevel, position, bounds };
+    props.onIdle!(e);
 
     return () => {
       props.onTilesLoaded && kakao.maps.event.removeListener(map, "tilesloaded", props.onTilesLoaded);
@@ -109,16 +119,16 @@ KakaoMap.defaultProps = {
   levelDuration: 300,
   baseMapType: "ROADMAP",
   overlayMapTypes: [],
-  onDrag: function () { },
-  onDragEnd: function () { },
-  onDragStart: function () { },
-  onMouseMove: function () { },
-  onClick: function () { },
-  onDoubleClick: function () { },
-  onRightClick: function () { },
-  onZoomStart: function () { },
-  onZoomChange: function () { },
-  onIdle: function () { },
+  onDrag() { },
+  onDragEnd() { },
+  onDragStart() { },
+  onMouseMove() { },
+  onClick() { },
+  onDoubleClick() { },
+  onRightClick() { },
+  onZoomStart() { },
+  onZoomChange() { },
+  onIdle() { },
 };
 
 const Position = PropTypes.shape({
