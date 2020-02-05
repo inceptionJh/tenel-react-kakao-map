@@ -66,8 +66,8 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
     props.onTilesLoaded && kakao.maps.event.addListener(map, "tilesloaded", props.onTilesLoaded);
     props.onBoundsChanged && kakao.maps.event.addListener(map, "bounds_changed", props.onBoundsChanged);
 
-    const zoomLevel = map.getLevel();
-    const position = { lat: map.getCenter().getLat(), lng: map.getCenter().getLng() };
+    const zoomLevel = props.level!;
+    const position = { lat: props.center.lat, lng: props.center.lng };
     const bounds = [
       { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
       { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
