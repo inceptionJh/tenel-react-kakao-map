@@ -62,25 +62,6 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
     return new kakao.maps.Map(props.container, options);
   });
 
-  React.useEffect(() => {
-    props.onTilesLoaded && kakao.maps.event.addListener(map, "tilesloaded", props.onTilesLoaded);
-    props.onBoundsChanged && kakao.maps.event.addListener(map, "bounds_changed", props.onBoundsChanged);
-
-    const zoomLevel = props.level!;
-    const position = { lat: props.center.lat, lng: props.center.lng };
-    const bounds = [
-      { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
-      { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
-    ] as [{ lat: number, lng: number }, { lat: number, lng: number }];
-    const e = { zoomLevel, position, bounds };
-    props.onIdle!(e);
-
-    return () => {
-      props.onTilesLoaded && kakao.maps.event.removeListener(map, "tilesloaded", props.onTilesLoaded);
-      props.onBoundsChanged && kakao.maps.event.removeListener(map, "bounds_changed", props.onBoundsChanged);
-    };
-  }, []);
-
   _hooks.useCenter(map, props.center);
   _hooks.useDrag(map, props.draggable!);
   _hooks.useCursor(map, props.cursor);
@@ -99,8 +80,26 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   _hooks.useClickEvent(map, props.onClick!);
   _hooks.useDoubleClickEvent(map, props.onDoubleClick!);
   _hooks.useRightClickEvent(map, props.onRightClick!);
-
   _hooks.useIdleEvent(map, props.onIdle!);
+
+  React.useEffect(() => {
+    props.onTilesLoaded && kakao.maps.event.addListener(map, "tilesloaded", props.onTilesLoaded);
+    props.onBoundsChanged && kakao.maps.event.addListener(map, "bounds_changed", props.onBoundsChanged);
+
+    const zoomLevel = props.level!;
+    const position = { lat: props.center.lat, lng: props.center.lng };
+    const bounds = [
+      { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
+      { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
+    ] as [{ lat: number, lng: number }, { lat: number, lng: number }];
+    const e = { zoomLevel, position, bounds };
+    props.onIdle!(e);
+
+    return () => {
+      props.onTilesLoaded && kakao.maps.event.removeListener(map, "tilesloaded", props.onTilesLoaded);
+      props.onBoundsChanged && kakao.maps.event.removeListener(map, "bounds_changed", props.onBoundsChanged);
+    };
+  }, []);
 
   return (
     <KakaoMapContext.Provider value={{ map }}>
