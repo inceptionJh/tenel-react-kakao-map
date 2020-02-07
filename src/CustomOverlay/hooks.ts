@@ -4,41 +4,41 @@ import * as React from "react";
 
 declare var kakao: IKakao;
 
-const useInit = (circle: IKakaoCustomOverlay, map: IKakaoMap) => {
+const useInit = (customOverlay: IKakaoCustomOverlay, map: IKakaoMap) => {
   React.useEffect(() => {
-    circle.setMap(map);
-    return () => circle.setMap(null);
+    customOverlay.setMap(map);
+    return () => customOverlay.setMap(null);
   }, []);
 };
 
-const usePosition = (ellipse: IKakaoCustomOverlay, position: { lat: number, lng: number }) => {
+const usePosition = (customOverlay: IKakaoCustomOverlay, position: { lat: number, lng: number }) => {
   React.useEffect(() => {
     const latlng = new kakao.maps.LatLng(position.lat, position.lng);
-    ellipse.setPosition(latlng);
+    customOverlay.setPosition(latlng);
   }, [position]);
 };
 
-const useContent = (ellipse: IKakaoCustomOverlay, content: HTMLElement | string) => {
+const useContent = (customOverlay: IKakaoCustomOverlay, content: HTMLElement | string) => {
   React.useEffect(() => {
-    ellipse.setContent(content);
+    customOverlay.setContent(content);
   }, [content]);
 };
 
-const useRange = (marker: IKakaoCustomOverlay, range: number) => {
+const useRange = (customOverlay: IKakaoCustomOverlay, range: number) => {
   React.useEffect(() => {
-    marker.setRange(range);
+    customOverlay.setRange(range);
   }, [range]);
 };
 
-const useAltitude = (marker: IKakaoCustomOverlay, altitude: number) => {
+const useAltitude = (customOverlay: IKakaoCustomOverlay, altitude: number) => {
   React.useEffect(() => {
-    marker.setAltitude(altitude);
+    customOverlay.setAltitude(altitude);
   }, [altitude]);
 };
 
-const useZIndex = (ellipse: IKakaoCustomOverlay, zIndex: number) => {
+const useZIndex = (customOverlay: IKakaoCustomOverlay, zIndex: number) => {
   React.useEffect(() => {
-    ellipse.setZIndex(zIndex);
+    customOverlay.setZIndex(zIndex);
   }, [zIndex]);
 };
 

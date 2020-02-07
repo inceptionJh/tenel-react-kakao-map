@@ -36,8 +36,8 @@ export const Basic = () => {
           <KakaoMaps.CustomOverlay
             position={{ lat: number("position.latitude", 33.450701), lng: number("position.longitude", 126.570667) }}
             clickable={boolean("clickable", true)}
-            xAnchor={number("xAnchor", 0.5, { min: 0, max: 1, range: true, step: 0.01 })}
-            yAnchor={number("yAnchor", 0.5, { min: 0, max: 1, range: true, step: 0.01 })}
+            xAnchor={0.5}
+            yAnchor={0.5}
             zIndex={number("zIndex", 0)}
             altitude={number("altitude", 2)}
             range={number("range", 500)}
