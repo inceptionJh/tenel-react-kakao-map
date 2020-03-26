@@ -1,4 +1,4 @@
-import { IKakao, IKakaoDrawingManager, IKakaoDrawingMouseEvent, IDrawingManagerOptions, IKakaoDrawingOverayType, TKakaoStrokeStyles, TKakaoDrawingOverayTypeValue } from "tenel-kakao-map";
+import { IKakao, IKakaoDrawingManager, IKakaoDrawingMouseEvent, IDrawingManagerOptions, TKakaoStrokeStyles, TKakaoDrawingOverayTypeValue } from "tenel-kakao-map";
 
 import * as React from "react";
 

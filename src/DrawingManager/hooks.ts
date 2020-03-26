@@ -6,8 +6,6 @@ export const useDrawShape = (drawingManager: IKakaoDrawingManager, shape: TKakao
   React.useEffect(() => {
     if (shape === "none") return drawingManager.cancel();
 
-    console.log("shape :", shape);
-
     drawingManager.select(shape);
   }, [shape]);
 };
