@@ -1,7 +1,5 @@
 import React from "react";
 
-import { number, color, select } from "@storybook/addon-knobs";
-
 import KakaoMaps from "../_lib";
 
 export default {
@@ -24,9 +22,8 @@ export const Basic = () => {
             center={{ lat: 33.450701, lng: 126.570667 }}
           >
             <KakaoMaps.DrawingManager
-              shape={draw ? "circle" : "none"}
+              shape={draw ? "polygon" : "none"}
               onDrawend={(e) => {
-                console.log(e);
                 setDraw(false);
               }}
             />

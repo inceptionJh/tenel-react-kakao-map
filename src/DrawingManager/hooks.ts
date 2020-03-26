@@ -37,12 +37,13 @@ export const useSetShapeStyle = (
 
 export const useDrawendEvent = (
   drawingManager: IKakaoDrawingManager,
-  callback: (mouseEvent: IKakaoDrawingMouseEvent) => void,
+  callback: (shape: any) => void,
 ) => {
   React.useEffect(() => {
     const onDrawend = (mouseEvent: IKakaoDrawingMouseEvent) => {
+      const data = drawingManager.getData();
       drawingManager.remove(mouseEvent.target);
-      callback(mouseEvent);
+      callback(data[mouseEvent.overlayType][0]);
     };
 
     try {

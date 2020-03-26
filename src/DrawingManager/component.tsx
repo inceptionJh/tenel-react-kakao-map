@@ -1,4 +1,4 @@
-import { IKakao, IKakaoDrawingManager, IKakaoDrawingMouseEvent, IDrawingManagerOptions, TKakaoStrokeStyles, TKakaoDrawingOverayTypeValue } from "tenel-kakao-map";
+import { IKakao, IKakaoDrawingManager, IDrawingManagerOptions, TKakaoStrokeStyles, TKakaoDrawingOverayTypeValue } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -22,7 +22,7 @@ export interface IKakaoMapsDrawingManagerProps {
   strokeOpacity?: number;
   hintStrokeStyle?: TKakaoStrokeStyles;
   hintStrokeOpacity?: number;
-  onDrawend: (mouseEvent: IKakaoDrawingMouseEvent) => void;
+  onDrawend: (shape: any) => void;
 }
 
 const DrawingManager: React.FunctionComponent<IKakaoMapsDrawingManagerProps> = (props) => {
