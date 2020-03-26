@@ -22,6 +22,9 @@ import PolygonContext from "./Polygon/context";
 import Polyline from "./Polyline/component";
 import PolylineContext from "./Polyline/context";
 
+import DrawingManager from "./DrawingManager/component";
+import DrawingManagerContext from "./DrawingManager/context";
+
 const KakaoMaps = {
   Map,
   MapContext,
@@ -46,6 +49,9 @@ const KakaoMaps = {
 
   Polyline,
   PolylineContext,
+
+  DrawingManager,
+  DrawingManagerContext,
 };
 
 export default KakaoMaps;

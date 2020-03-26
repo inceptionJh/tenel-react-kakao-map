@@ -28,22 +28,22 @@
     "react-dom": "^16.12.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.3",
-    "@storybook/addon-actions": "^5.3.5",
+    "@babel/core": "^7.9.0",
+    "@storybook/addon-actions": "^5.3.17",
     "@storybook/addon-console": "^1.2.1",
-    "@storybook/addon-docs": "^5.3.6",
-    "@storybook/addon-knobs": "^5.3.5",
-    "@storybook/addon-notes": "^5.3.5",
-    "@storybook/addons": "^5.3.5",
-    "@storybook/react": "^5.3.5",
-    "@types/react": "^16.9.13",
-    "@types/react-dom": "^16.9.4",
-    "babel-loader": "^8.0.6",
+    "@storybook/addon-docs": "^5.3.17",
+    "@storybook/addon-knobs": "^5.3.17",
+    "@storybook/addon-notes": "^5.3.17",
+    "@storybook/addons": "^5.3.17",
+    "@storybook/react": "^5.3.17",
+    "@types/react": "^16.9.25",
+    "@types/react-dom": "^16.9.5",
+    "babel-loader": "^8.1.0",
     "parcel-bundler": "^1.12.4",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "storybook-addon-react-docgen": "^1.2.28",
-    "tenel-kakao-map": "^1.0.16",
-    "typescript": "^3.7.2"
+    "tenel-kakao-map": "^1.0.18",
+    "typescript": "^3.8.3"
   }
 }
