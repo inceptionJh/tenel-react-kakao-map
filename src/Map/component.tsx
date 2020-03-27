@@ -36,7 +36,7 @@ export interface IKakaoMapsMapProps {
   onZoomStart?: (e: { zoomLevel: number }) => void;
   onZoomChange?: (e: { zoomLevel: number }) => void;
   onClick?: (e: { position: { lat: number, lng: number } }) => void;
-  onRightClick?: () => void;
+  onRightClick?: (e: { position: { lat: number, lng: number } }) => void;
   onDoubleClick?: (e: { position: { lat: number, lng: number } }) => void;
   onDrag?: (e: { position: { lat: number, lng: number } }) => void;
   onDragEnd?: (e: { position: { lat: number, lng: number } }) => void;
