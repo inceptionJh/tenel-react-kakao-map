@@ -79,10 +79,16 @@ const useDoubleClickEvent = (
 
 const useRightClickEvent = (
   map: IKakaoMap,
-  callback: () => void,
+  callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   React.useEffect(() => {
-    const onRightClick = () => callback();
+    const onRightClick = (event: IKakaoMouseEvent) => {
+      const lat = event.latLng.getLat();
+      const lng = event.latLng.getLng();
+      const position = { lat, lng };
+      const e = { position };
+      callback(e);
+    };
 
     kakao.maps.event.removeListener(map, "rightclick", onRightClick);
     kakao.maps.event.addListener(map, "rightclick", onRightClick);
