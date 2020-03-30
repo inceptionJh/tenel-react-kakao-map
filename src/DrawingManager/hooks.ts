@@ -39,18 +39,24 @@ export const useDrawendEvent = (
   drawingManager: IKakaoDrawingManager,
   callback: (shape: any) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDrawend = (mouseEvent: IKakaoDrawingMouseEvent) => {
+    try {
+      drawingManager.removeListener("drawend", _.callback);
+    } catch (error) { }
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = (mouseEvent: IKakaoDrawingMouseEvent) => {
       const data = drawingManager.getData();
       drawingManager.remove(mouseEvent.target);
       callback(data[mouseEvent.overlayType][0]);
-    };
+    };;
+  }, [callback]);
 
-    try {
-      drawingManager.removeListener("drawend", onDrawend);
-    } catch (error) { }
-    drawingManager.addListener("drawend", onDrawend);
-
-    return () => drawingManager.removeListener("drawend", onDrawend);
+  React.useEffect(() => {
+    drawingManager.addListener("drawend", _.callback);
+    return () => drawingManager.removeListener("drawend", _.callback);
   }, [callback]);
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import KakaoMaps from "../_lib";
 
@@ -10,22 +10,31 @@ export default {
 export const Basic = () => {
   const [container, setContainer] = React.useState();
 
-  const [draw, setDraw] = React.useState(false);
+  const [shape, setShape] = React.useState("none");
+
+  const onDrawend = (shape) => {
+    console.log(shape);
+    setShape("none");
+  };
+
+  const [count, setCount] = React.useState(0);
 
   return (
     <div>
-      <button onClick={() => setDraw((prev) => !prev)}>toggle</button>
+      <button onClick={() => setShape((prev) => prev === "none" ? "polygon" : "none")}>toggle</button>
       <div ref={(ref) => setContainer(ref)} style={{ width: 600, height: 400 }}>
         {container ? (
           <KakaoMaps.Map
             container={container}
             center={{ lat: 33.450701, lng: 126.570667 }}
+            onZoomChange={(e) => {
+              console.log(e.zoomLevel);
+              setCount((prev) => prev + 1);
+            }}
           >
             <KakaoMaps.DrawingManager
-              shape={draw ? "polygon" : "none"}
-              onDrawend={(e) => {
-                setDraw(false);
-              }}
+              shape={shape}
+              onDrawend={(shape) => onDrawend(shape)}
             />
           </KakaoMaps.Map>
         )

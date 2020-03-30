@@ -21,19 +21,25 @@ const useMouseMoveEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onMouseMove = (event: IKakaoMouseEvent) => {
+    kakao.maps.event.removeListener(map, "mousemove", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = (event: IKakaoMouseEvent) => {
       const lat = event.latLng.getLat();
       const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "mousemove", onMouseMove);
-    kakao.maps.event.addListener(map, "mousemove", onMouseMove);
-
-    return () => kakao.maps.event.removeListener(map, "mousemove", onMouseMove);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "mousemove", _.callback);
+    return () => kakao.maps.event.removeListener(map, "mousemove", _.callback);
   }, [callback]);
 };
 
@@ -41,19 +47,25 @@ const useClickEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onClick = (event: IKakaoMouseEvent) => {
+    kakao.maps.event.removeListener(map, "click", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = (event: IKakaoMouseEvent) => {
       const lat = event.latLng.getLat();
       const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "click", onClick);
-    kakao.maps.event.addListener(map, "click", onClick);
-
-    return () => kakao.maps.event.removeListener(map, "click", onClick);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "click", _.callback);
+    return () => kakao.maps.event.removeListener(map, "click", _.callback);
   }, [callback]);
 };
 
@@ -61,19 +73,25 @@ const useDoubleClickEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDoubleClick = (event: IKakaoMouseEvent) => {
+    kakao.maps.event.removeListener(map, "dbclick", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = (event: IKakaoMouseEvent) => {
       const lat = event.latLng.getLat();
       const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "dbclick", onDoubleClick);
-    kakao.maps.event.addListener(map, "dbclick", onDoubleClick);
-
-    return () => kakao.maps.event.removeListener(map, "dbclick", onDoubleClick);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "dbclick", _.callback);
+    return () => kakao.maps.event.removeListener(map, "dbclick", _.callback);
   }, [callback]);
 };
 
@@ -81,19 +99,25 @@ const useRightClickEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onRightClick = (event: IKakaoMouseEvent) => {
+    kakao.maps.event.removeListener(map, "rightclick", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = (event: IKakaoMouseEvent) => {
       const lat = event.latLng.getLat();
       const lng = event.latLng.getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "rightclick", onRightClick);
-    kakao.maps.event.addListener(map, "rightclick", onRightClick);
-
-    return () => kakao.maps.event.removeListener(map, "rightclick", onRightClick);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "rightclick", _.callback);
+    return () => kakao.maps.event.removeListener(map, "rightclick", _.callback);
   }, [callback]);
 };
 
@@ -101,20 +125,25 @@ const useDragStartEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDragStart = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
+    kakao.maps.event.removeListener(map, "dragstart", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
+      const lat = map.getCenter().getLat();
+      const lng = map.getCenter().getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "dragstart", onDragStart);
-    kakao.maps.event.addListener(map, "dragstart", onDragStart);
-
-    return () => kakao.maps.event.removeListener(map, "dragstart", onDragStart);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "dragstart", _.callback);
+    return () => kakao.maps.event.removeListener(map, "dragstart", _.callback);
   }, [callback]);
 };
 
@@ -122,20 +151,25 @@ const useDragEndEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDragEnd = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
+    kakao.maps.event.removeListener(map, "dragend", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
+      const lat = map.getCenter().getLat();
+      const lng = map.getCenter().getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "dragend", onDragEnd);
-    kakao.maps.event.addListener(map, "dragend", onDragEnd);
-
-    return () => kakao.maps.event.removeListener(map, "dragend", onDragEnd);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "dragend", _.callback);
+    return () => kakao.maps.event.removeListener(map, "dragend", _.callback);
   }, [callback]);
 };
 
@@ -143,20 +177,25 @@ const useDragEvent = (
   map: IKakaoMap,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDrag = () => {
-      const latlng = map.getCenter();
-      const lat = latlng.getLat();
-      const lng = latlng.getLng();
+    kakao.maps.event.removeListener(map, "drag", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
+      const lat = map.getCenter().getLat();
+      const lng = map.getCenter().getLng();
       const position = { lat, lng };
       const e = { position };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "drag", onDrag);
-    kakao.maps.event.addListener(map, "drag", onDrag);
-
-    return () => kakao.maps.event.removeListener(map, "drag", onDrag);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "drag", _.callback);
+    return () => kakao.maps.event.removeListener(map, "drag", _.callback);
   }, [callback]);
 };
 
@@ -164,17 +203,23 @@ const useZoomStartEvent = (
   map: IKakaoMap,
   callback: (e: { zoomLevel: number }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDrag = () => {
+    kakao.maps.event.removeListener(map, "zoom_start", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
       const zoomLevel = map.getLevel();
       const e = { zoomLevel };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "zoom_start", onDrag);
-    kakao.maps.event.addListener(map, "zoom_start", onDrag);
-
-    return () => kakao.maps.event.removeListener(map, "zoom_start", onDrag);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "zoom_start", _.callback);
+    return () => kakao.maps.event.removeListener(map, "zoom_start", _.callback);
   }, [callback]);
 };
 
@@ -182,17 +227,23 @@ const useZoomChangedEvent = (
   map: IKakaoMap,
   callback: (e: { zoomLevel: number }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onDrag = () => {
+    kakao.maps.event.removeListener(map, "zoom_changed", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
       const zoomLevel = map.getLevel();
       const e = { zoomLevel };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "zoom_changed", onDrag);
-    kakao.maps.event.addListener(map, "zoom_changed", onDrag);
-
-    return () => kakao.maps.event.removeListener(map, "zoom_changed", onDrag);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "zoom_changed", _.callback);
+    return () => kakao.maps.event.removeListener(map, "zoom_changed", _.callback);
   }, [callback]);
 };
 
@@ -289,8 +340,14 @@ const useIdleEvent = (
     bounds: [{ lat: number, lng: number }, { lat: number, lng: number }],
   }) => void,
 ) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
   React.useEffect(() => {
-    const onIdle = () => {
+    kakao.maps.event.removeListener(map, "idle", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
       const latlng = map.getCenter();
       const lat = latlng.getLat();
       const lng = latlng.getLng();
@@ -312,11 +369,11 @@ const useIdleEvent = (
       const e = { zoomLevel, position, bounds };
       callback(e);
     };
+  }, [callback]);
 
-    kakao.maps.event.removeListener(map, "idle", onIdle);
-    kakao.maps.event.addListener(map, "idle", onIdle);
-
-    return () => kakao.maps.event.removeListener(map, "idle", onIdle);
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "idle", _.callback);
+    return () => kakao.maps.event.removeListener(map, "idle", _.callback);
   }, [callback]);
 };
 
