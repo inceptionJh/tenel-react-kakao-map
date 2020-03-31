@@ -18,6 +18,7 @@ export interface IKakaoMapsMapProps {
   cursor?: string;
   draggable?: boolean;
   zoomable?: boolean;
+  drawing?: boolean;
   level?: number;
   minLevel?: number;
   maxLevel?: number;
@@ -77,7 +78,7 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   _hooks.useDragEvent(map, props.onDrag!);
   _hooks.useDragStartEvent(map, props.onDragStart!);
   _hooks.useDragEndEvent(map, props.onDragEnd!);
-  _hooks.useClickEvent(map, props.onClick!);
+  _hooks.useClickEvent(map, props.drawing!, props.onClick!);
   _hooks.useDoubleClickEvent(map, props.onDoubleClick!);
   _hooks.useRightClickEvent(map, props.onRightClick!);
   _hooks.useIdleEvent(map, props.onIdle!);
@@ -111,6 +112,7 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
 KakaoMap.defaultProps = {
   zoomable: true,
   draggable: true,
+  drawing: false,
   copyright: { position: "BOTTOMLEFT", reverse: false },
   level: 3,
   minLevel: 1,

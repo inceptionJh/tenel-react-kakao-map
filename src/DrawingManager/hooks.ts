@@ -52,7 +52,7 @@ export const useDrawendEvent = (
       const data = drawingManager.getData();
       drawingManager.remove(mouseEvent.target);
       callback(data[mouseEvent.overlayType][0]);
-    };;
+    };
   }, [callback]);
 
   React.useEffect(() => {

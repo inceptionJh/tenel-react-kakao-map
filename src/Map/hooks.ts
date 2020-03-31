@@ -45,15 +45,18 @@ const useMouseMoveEvent = (
 
 const useClickEvent = (
   map: IKakaoMap,
+  drawing: boolean,
   callback: (e: { position: { lat: number, lng: number } }) => void,
 ) => {
   const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
 
   React.useEffect(() => {
+    if (drawing) return;
     kakao.maps.event.removeListener(map, "click", _.callback);
-  }, [callback]);
+  }, [_.callback]);
 
   React.useEffect(() => {
+    if (drawing) return;
     _.callback = (event: IKakaoMouseEvent) => {
       const lat = event.latLng.getLat();
       const lng = event.latLng.getLng();
@@ -64,9 +67,9 @@ const useClickEvent = (
   }, [callback]);
 
   React.useEffect(() => {
-    kakao.maps.event.addListener(map, "click", _.callback);
+    if (!drawing) kakao.maps.event.addListener(map, "click", _.callback);
     return () => kakao.maps.event.removeListener(map, "click", _.callback);
-  }, [callback]);
+  }, [_.callback]);
 };
 
 const useDoubleClickEvent = (
