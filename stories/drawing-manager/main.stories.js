@@ -33,7 +33,10 @@ export const Basic = () => {
             container={container}
             drawing={shape !== "none"}
             center={{ lat: 33.450701, lng: 126.570667 }}
-            onClick={() => setCount((prev) => prev + 1)}
+            onClick={() => {
+              setCount((prev) => prev + 1);
+              console.log(`count : ${count + 1}`);
+            }}
           >
             <KakaoMaps.DrawingManager
               shape={shape}

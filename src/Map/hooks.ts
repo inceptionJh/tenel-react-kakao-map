@@ -64,12 +64,14 @@ const useClickEvent = (
       const e = { position };
       callback(e);
     };
-  }, [callback]);
+  });
 
   React.useEffect(() => {
-    if (!drawing) kakao.maps.event.addListener(map, "click", _.callback);
+    if (!drawing) {
+      kakao.maps.event.addListener(map, "click", _.callback);
+    }
     return () => kakao.maps.event.removeListener(map, "click", _.callback);
-  }, [_.callback]);
+  });
 };
 
 const useDoubleClickEvent = (
