@@ -382,6 +382,42 @@ const useIdleEvent = (
   }, [callback]);
 };
 
+const useChangeBoundsEvent = (
+  map: IKakaoMap,
+  callback: (e: {
+    bounds: [{ lat: number, lng: number }, { lat: number, lng: number }],
+  }) => void,
+) => {
+  const _ = React.useMemo(() => ({ callback: (() => { }) as any }), []);
+
+  React.useEffect(() => {
+    kakao.maps.event.removeListener(map, "bounds_changed", _.callback);
+  }, [callback]);
+
+  React.useEffect(() => {
+    _.callback = () => {
+      const kakaoBounds = map.getBounds();
+      const ne = kakaoBounds.getNorthEast();
+      const neLat = ne.getLat();
+      const neLng = ne.getLng();
+
+      const sw = kakaoBounds.getSouthWest();
+      const swLat = sw.getLat();
+      const swLng = sw.getLng();
+
+      const bounds = [{ lat: swLat, lng: swLng }, { lat: neLat, lng: neLng }] as [{ lat: number, lng: number }, { lat: number, lng: number }];
+
+      const e = { bounds };
+      callback(e);
+    };
+  }, [callback]);
+
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "bounds_changed", _.callback);
+    return () => kakao.maps.event.removeListener(map, "bounds_changed", _.callback);
+  }, [callback]);
+};
+
 export default {
   useCenter,
   useDrag,
@@ -401,4 +437,5 @@ export default {
   useBaseMapTypes,
   useOverlayMapTypes,
   useIdleEvent,
+  useChangeBoundsEvent,
 };

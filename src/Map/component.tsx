@@ -44,7 +44,12 @@ export interface IKakaoMapsMapProps {
   onDragStart?: (e: { position: { lat: number, lng: number } }) => void;
   onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
   onTilesLoaded?: () => void;
-  onBoundsChanged?: () => void;
+  onBoundsChanged?: (e: {
+    bounds: [
+      { lat: number, lng: number },
+      { lat: number, lng: number },
+    ],
+  }) => void;
   /** bounds: [sw, ne] */
   onIdle?: (e: {
     zoomLevel: number,
@@ -82,10 +87,10 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   _hooks.useDoubleClickEvent(map, props.onDoubleClick!);
   _hooks.useRightClickEvent(map, props.onRightClick!);
   _hooks.useIdleEvent(map, props.onIdle!);
+  _hooks.useChangeBoundsEvent(map, props.onBoundsChanged!);
 
   React.useEffect(() => {
     props.onTilesLoaded && kakao.maps.event.addListener(map, "tilesloaded", props.onTilesLoaded);
-    props.onBoundsChanged && kakao.maps.event.addListener(map, "bounds_changed", props.onBoundsChanged);
 
     const zoomLevel = props.level!;
     const position = { lat: props.center.lat, lng: props.center.lng };
@@ -98,9 +103,12 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
 
     return () => {
       props.onTilesLoaded && kakao.maps.event.removeListener(map, "tilesloaded", props.onTilesLoaded);
-      props.onBoundsChanged && kakao.maps.event.removeListener(map, "bounds_changed", props.onBoundsChanged);
     };
   }, []);
+
+  React.useEffect(() => {
+    kakao.maps.event.trigger(map, "idle", {});
+  }, [props.level, props.maxLevel, props.center, props.minLevel]);
 
   return (
     <KakaoMapContext.Provider value={{ map }}>
@@ -130,6 +138,7 @@ KakaoMap.defaultProps = {
   onZoomStart() { },
   onZoomChange() { },
   onIdle() { },
+  onBoundsChanged() { },
 };
 
 const Position = PropTypes.shape({
