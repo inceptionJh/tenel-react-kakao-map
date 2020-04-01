@@ -108,7 +108,7 @@ const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
 
   React.useEffect(() => {
     kakao.maps.event.trigger(map, "idle", {});
-  }, [props.level, props.maxLevel, props.center, props.minLevel]);
+  }, [props.level, props.maxLevel, props.minLevel]);
 
   return (
     <KakaoMapContext.Provider value={{ map }}>
