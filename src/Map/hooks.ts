@@ -266,9 +266,9 @@ const useZoom = (map: IKakaoMap, zoomable: boolean, min: number, max: number, va
   }, [min]);
 
   React.useEffect(() => {
-    const animation = { duration };
+    const animate = { duration };
     const anchor = undefined;
-    const options = { animation, anchor };
+    const options = { animate, anchor };
     map.setLevel(value, options);
   }, [value, duration]);
 };
