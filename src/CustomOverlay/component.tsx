@@ -1,4 +1,4 @@
-import { IKakao, IKakaoCustomOverlay } from "tenel-kakao-map";
+import ReactDOM from "react-dom";
 
 import * as React from "react";
 
@@ -8,6 +8,8 @@ import KakaoMapContext from "../Map/context";
 import CustomOverlayContext from "./context";
 
 import _hooks from "./hooks";
+
+import type { IKakao } from "tenel-kakao-map";
 
 declare var kakao: IKakao;
 
@@ -25,23 +27,50 @@ export interface IKakaoMapsCustomOverlayProps {
   range?: number;
 }
 
-const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (props) => {
-  const mapCtx = React.useContext(KakaoMapContext);
+const toElement = <K extends keyof HTMLElementTagNameMap>(html: string, tagName = "div" as K): HTMLElementTagNameMap[K] => {
+  const element = document.createElement(tagName);
+  element.innerHTML = html;
+  return element;
+};
 
-  const [customOverlay] = React.useState<IKakaoCustomOverlay>(() => {
-    return new kakao.maps.CustomOverlay({ clickable: props.clickable, xAnchor: props.xAnchor, yAnchor: props.yAnchor });
+const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (props) => {
+  const { map } = React.useContext(KakaoMapContext);
+
+  const [state, setState] = React.useState(() => {
+    const content = typeof props.content === "string"
+      ? toElement(props.content, "div")
+      : props.content;
+
+    const options = {
+      map,
+      content,
+      xAnchor: props.xAnchor,
+      yAnchor: props.yAnchor,
+      clickable: props.clickable,
+    };
+    const customOverlay = new kakao.maps.CustomOverlay(options);
+
+    return { content, customOverlay };
   });
 
-  _hooks.useInit(customOverlay, mapCtx.map);
-  _hooks.usePosition(customOverlay, props.position);
-  _hooks.useContent(customOverlay, props.content);
-  _hooks.useZIndex(customOverlay, props.zIndex!);
-  _hooks.useRange(customOverlay, props.range!);
-  _hooks.useAltitude(customOverlay, props.altitude!);
+  React.useEffect(() => {
+    const content = typeof props.content === "string"
+      ? toElement(props.content, "div")
+      : props.content;
+
+    setState((prev) => ({ ...prev, content }));
+    state.customOverlay.setContent(content);
+  }, [props.content]);
+
+  _hooks.useInit(state.customOverlay);
+  _hooks.useRange(state.customOverlay, props.range!);
+  _hooks.useZIndex(state.customOverlay, props.zIndex!);
+  _hooks.usePosition(state.customOverlay, props.position);
+  _hooks.useAltitude(state.customOverlay, props.altitude!);
 
   return (
-    <CustomOverlayContext.Provider value={{ customOverlay }}>
-      {props.children}
+    <CustomOverlayContext.Provider value={{ customOverlay: state.customOverlay }}>
+      {ReactDOM.createPortal(props.children, state.content)}
     </CustomOverlayContext.Provider>
   );
 };

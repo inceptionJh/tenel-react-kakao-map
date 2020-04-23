@@ -1,12 +1,11 @@
-import { IKakao, IKakaoMap, IKakaoCustomOverlay } from "tenel-kakao-map";
+import { IKakao, IKakaoCustomOverlay } from "tenel-kakao-map";
 
 import * as React from "react";
 
 declare var kakao: IKakao;
 
-const useInit = (customOverlay: IKakaoCustomOverlay, map: IKakaoMap) => {
+const useInit = (customOverlay: IKakaoCustomOverlay) => {
   React.useEffect(() => {
-    customOverlay.setMap(map);
     return () => customOverlay.setMap(null);
   }, []);
 };
@@ -16,12 +15,6 @@ const usePosition = (customOverlay: IKakaoCustomOverlay, position: { lat: number
     const latlng = new kakao.maps.LatLng(position.lat, position.lng);
     customOverlay.setPosition(latlng);
   }, [position]);
-};
-
-const useContent = (customOverlay: IKakaoCustomOverlay, content: HTMLElement | string) => {
-  React.useEffect(() => {
-    customOverlay.setContent(content);
-  }, [content]);
 };
 
 const useRange = (customOverlay: IKakaoCustomOverlay, range: number) => {
@@ -44,9 +37,8 @@ const useZIndex = (customOverlay: IKakaoCustomOverlay, zIndex: number) => {
 
 export default {
   useInit,
-  usePosition,
-  useContent,
   useRange,
-  useAltitude,
   useZIndex,
+  usePosition,
+  useAltitude,
 };
