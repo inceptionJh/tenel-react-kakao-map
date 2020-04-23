@@ -2,14 +2,14 @@ import ReactDOM from "react-dom";
 
 import * as React from "react";
 
+import { IKakao } from "tenel-kakao-map";
+
 import PropTypes from "prop-types";
 
 import KakaoMapContext from "../Map/context";
 import CustomOverlayContext from "./context";
 
 import _hooks from "./hooks";
-
-import type { IKakao } from "tenel-kakao-map";
 
 declare var kakao: IKakao;
 
