@@ -1,4 +1,4 @@
-import { IKakao, IKakaoCopyrightPosition, TKakaoOverayMapTypeIdKey, TKakaoBaseMapTypeIdKey } from "tenel-kakao-map";
+import { IKakao, IKakaoCopyrightPosition, TKakaoOverayMapTypeIdKey, TKakaoBaseMapTypeIdKey, IKakaoMapOptions } from "tenel-kakao-map";
 
 import * as React from "react";
 
@@ -64,7 +64,7 @@ export interface IKakaoMapsMapProps {
 const KakaoMap: React.FunctionComponent<IKakaoMapsMapProps> = (props) => {
   const [map] = React.useState(() => {
     const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
-    const options = { center: latlng };
+    const options: IKakaoMapOptions = { center: latlng, level: props.level };
     return new kakao.maps.Map(props.container, options);
   });
 
