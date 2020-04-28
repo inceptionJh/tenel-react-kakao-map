@@ -50,8 +50,12 @@ const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (pr
     };
     const customOverlay = new kakao.maps.CustomOverlay(options);
 
-    return { content, customOverlay };
+    const mount = false;
+
+    return { content, customOverlay, mount };
   });
+
+  React.useEffect(() => { setState((prev) => ({ ...prev, mount: true })); }, []);
 
   React.useEffect(() => {
     const content = typeof props.content === "string"
@@ -70,7 +74,7 @@ const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (pr
 
   return (
     <CustomOverlayContext.Provider value={{ customOverlay: state.customOverlay }}>
-      {ReactDOM.createPortal(props.children, state.content)}
+      {state.mount && ReactDOM.createPortal(props.children, state.content)}
     </CustomOverlayContext.Provider>
   );
 };
