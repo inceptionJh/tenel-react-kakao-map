@@ -36,45 +36,31 @@ const toElement = <K extends keyof HTMLElementTagNameMap>(html: string, tagName 
 const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (props) => {
   const { map } = React.useContext(KakaoMapContext);
 
-  const [state, setState] = React.useState(() => {
-    const content = typeof props.content === "string"
-      ? toElement(props.content, "div")
-      : props.content;
+  const [customOverlay, content] = React.useMemo(() => {
+    const contentEl = typeof props.content === "string" ? toElement(props.content, "div") : props.content;
+    const position = new kakao.maps.LatLng(props.position.lat, props.position.lng);
 
     const options = {
       map,
-      content,
+      position,
+      content: contentEl,
       xAnchor: props.xAnchor,
       yAnchor: props.yAnchor,
       clickable: props.clickable,
     };
-    const customOverlay = new kakao.maps.CustomOverlay(options);
 
-    const mount = false;
-
-    return { content, customOverlay, mount };
-  });
-
-  React.useEffect(() => { setState((prev) => ({ ...prev, mount: true })); }, []);
-
-  React.useEffect(() => {
-    const content = typeof props.content === "string"
-      ? toElement(props.content, "div")
-      : props.content;
-
-    setState((prev) => ({ ...prev, content }));
-    state.customOverlay.setContent(content);
+    return [new kakao.maps.CustomOverlay(options), contentEl];
   }, [props.content]);
 
-  _hooks.useInit(state.customOverlay);
-  _hooks.useRange(state.customOverlay, props.range!);
-  _hooks.useZIndex(state.customOverlay, props.zIndex!);
-  _hooks.usePosition(state.customOverlay, props.position);
-  _hooks.useAltitude(state.customOverlay, props.altitude!);
+  _hooks.useInit(customOverlay);
+  _hooks.useRange(customOverlay, props.range!);
+  _hooks.useZIndex(customOverlay, props.zIndex!);
+  _hooks.usePosition(customOverlay, props.position);
+  _hooks.useAltitude(customOverlay, props.altitude!);
 
   return (
-    <CustomOverlayContext.Provider value={{ customOverlay: state.customOverlay }}>
-      {state.mount && ReactDOM.createPortal(props.children, state.content)}
+    <CustomOverlayContext.Provider value={{ customOverlay }}>
+      {ReactDOM.createPortal(props.children, content)}
     </CustomOverlayContext.Provider>
   );
 };

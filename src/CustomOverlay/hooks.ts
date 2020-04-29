@@ -5,9 +5,7 @@ import * as React from "react";
 declare var kakao: IKakao;
 
 const useInit = (customOverlay: IKakaoCustomOverlay) => {
-  React.useEffect(() => {
-    return () => customOverlay.setMap(null);
-  }, []);
+  React.useEffect(() => () => customOverlay.setMap(null), []);
 };
 
 const usePosition = (customOverlay: IKakaoCustomOverlay, position: { lat: number, lng: number }) => {
@@ -18,21 +16,15 @@ const usePosition = (customOverlay: IKakaoCustomOverlay, position: { lat: number
 };
 
 const useRange = (customOverlay: IKakaoCustomOverlay, range: number) => {
-  React.useEffect(() => {
-    customOverlay.setRange(range);
-  }, [range]);
+  React.useEffect(() => { customOverlay.setRange(range); }, [range]);
 };
 
 const useAltitude = (customOverlay: IKakaoCustomOverlay, altitude: number) => {
-  React.useEffect(() => {
-    customOverlay.setAltitude(altitude);
-  }, [altitude]);
+  React.useEffect(() => { customOverlay.setAltitude(altitude); }, [altitude]);
 };
 
 const useZIndex = (customOverlay: IKakaoCustomOverlay, zIndex: number) => {
-  React.useEffect(() => {
-    customOverlay.setZIndex(zIndex);
-  }, [zIndex]);
+  React.useEffect(() => { customOverlay.setZIndex(zIndex); }, [zIndex]);
 };
 
 export default {
