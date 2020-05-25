@@ -385,8 +385,8 @@ class KakaoMap extends React.Component<IKakaoMapsMapProps> {
         lng: this.map.getCenter().getLng(),
       },
       bounds: [
-        { lat: this.map.getBounds().getNorthEast().getLat(), lng: this.map.getBounds().getNorthEast().getLng() },
         { lat: this.map.getBounds().getSouthWest().getLat(), lng: this.map.getBounds().getSouthWest().getLng() },
+        { lat: this.map.getBounds().getNorthEast().getLat(), lng: this.map.getBounds().getNorthEast().getLng() },
       ],
     });
   }
@@ -394,8 +394,8 @@ class KakaoMap extends React.Component<IKakaoMapsMapProps> {
   private onBoundsChanged = () => {
     this.props.onBoundsChanged?.({
       bounds: [
-        { lat: this.map.getBounds().getNorthEast().getLat(), lng: this.map.getBounds().getNorthEast().getLng() },
         { lat: this.map.getBounds().getSouthWest().getLat(), lng: this.map.getBounds().getSouthWest().getLng() },
+        { lat: this.map.getBounds().getNorthEast().getLat(), lng: this.map.getBounds().getNorthEast().getLng() },
       ],
     });
   }
