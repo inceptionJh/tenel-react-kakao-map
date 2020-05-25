@@ -153,8 +153,31 @@ class KakaoMap extends React.Component<IKakaoMapsMapProps> {
     super(props);
 
     const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
-    const options: IKakaoMapOptions = { center: latlng, level: props.level };
+    const options: IKakaoMapOptions = {
+      center: latlng,
+      level: props.level,
+    };
     this.map = new kakao.maps.Map(props.container, options);
+
+    this.map.setZoomable(this.props.zoomable!);
+    this.map.setDraggable(this.props.draggable!);
+    this.map.setMaxLevel(this.props.maxLevel!);
+    this.map.setMinLevel(this.props.minLevel!);
+    this.map.setMapTypeId(kakao.maps.MapTypeId[this.props.baseMapType!]);
+    this.map.setCopyrightPosition(kakao.maps.CopyrightPosition[this.props.copyright!.position], this.props.copyright!.reverse);
+
+    if (this.props.cursor) {
+      this.map.setCursor(this.props.cursor);
+    }
+
+    if (this.props.bounds) {
+      const sw = new kakao.maps.LatLng(this.props.bounds.value[0].lat, this.props.bounds.value[0].lng);
+      const ne = new kakao.maps.LatLng(this.props.bounds.value[1].lat, this.props.bounds.value[1].lng);
+      const kakaoBounds = new kakao.maps.LatLngBounds(sw, ne);
+      this.map.setBounds(kakaoBounds, this.props.bounds.paddingTop, this.props.bounds.paddingRight, this.props.bounds.paddingBottom, this.props.bounds.paddingLeft);
+    }
+
+    this.props.overlayMapTypes?.forEach((prevType) => this.map.addOverlayMapTypeId(kakao.maps.MapTypeId[prevType]));
 
     kakao.maps.event.addListener(this.map, "click", this.onClick);
     kakao.maps.event.addListener(this.map, "dbclick", this.onDoubleClick);
