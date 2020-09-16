@@ -333,29 +333,29 @@ class KakaoMap extends React.Component<IKakaoMapsMapProps> {
     })
   }
 
-  private onDrag = (e: IKakaoMouseEvent) => {
+  private onDrag = () => {
     this.props.onDrag?.({
       position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
+        lat: this.map.getCenter().getLat(),
+        lng: this.map.getCenter().getLng(),
       }
     })
   }
 
-  private onDragStart = (e: IKakaoMouseEvent) => {
+  private onDragStart = () => {
     this.props.onDragStart?.({
       position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
+        lat: this.map.getCenter().getLat(),
+        lng: this.map.getCenter().getLng(),
       }
     })
   }
 
-  private onDragEnd = (e: IKakaoMouseEvent) => {
+  private onDragEnd = () => {
     this.props.onDragEnd?.({
       position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
+        lat: this.map.getCenter().getLat(),
+        lng: this.map.getCenter().getLng(),
       }
     })
   }
