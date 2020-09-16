@@ -5,7 +5,6 @@ import * as React from "react";
 import PropTypes from "prop-types";
 
 import MarkerContext from "./context";
-import KakaoMapContext from "../Map/context";
 
 import _hooks from "./hooks";
 import MapContext from "../Map/context";
@@ -153,6 +152,7 @@ class Marker extends React.Component<IKakaoMapsMarkerProps> {
 
   public componentDidMount() {
     this.marker.setMap(this.context.map);
+    this.marker.setPosition(new kakao.maps.LatLng(this.props.position.lat, this.props.position.lng));
   }
 
   public componentWillUnmount() {
