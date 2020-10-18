@@ -64,37 +64,6 @@ const Position = PropTypes.shape({
 }).isRequired;
 
 function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
-  const map = React.useMemo<IKakaoMap>(() => {
-    const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
-    const options: IKakaoMapOptions = {
-      center: latlng,
-      level: props.level,
-    };
-    const $map = new kakao.maps.Map(props.container, options);
-
-    $map.setZoomable(props.zoomable!);
-    $map.setDraggable(props.draggable!);
-    $map.setMaxLevel(props.maxLevel!);
-    $map.setMinLevel(props.minLevel!);
-    $map.setMapTypeId(kakao.maps.MapTypeId[props.baseMapType!]);
-    $map.setCopyrightPosition(kakao.maps.CopyrightPosition[props.copyright!.position], props.copyright!.reverse);
-
-    if (props.cursor) {
-      $map.setCursor(props.cursor);
-    }
-
-    if (props.bounds) {
-      const sw = new kakao.maps.LatLng(props.bounds.value[0].lat, props.bounds.value[0].lng);
-      const ne = new kakao.maps.LatLng(props.bounds.value[1].lat, props.bounds.value[1].lng);
-      const kakaoBounds = new kakao.maps.LatLngBounds(sw, ne);
-      $map.setBounds(kakaoBounds, props.bounds.paddingTop, props.bounds.paddingRight, props.bounds.paddingBottom, props.bounds.paddingLeft);
-    }
-
-    props.overlayMapTypes?.forEach((prevType) => $map.addOverlayMapTypeId(kakao.maps.MapTypeId[prevType]));
-
-    return $map;
-  }, [props.container]);
-
   const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
 
   listeners.current.onClick = function onClick(e: IKakaoMouseEvent) {
@@ -195,20 +164,51 @@ function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
     props.onTilesLoaded?.();
   }
 
-  React.useEffect(() => {
-    kakao.maps.event.addListener(map, "click", listeners.current.onClick);
-    kakao.maps.event.addListener(map, "dblclick" as any, listeners.current.onDoubleClick);
-    kakao.maps.event.addListener(map, "rightclick", listeners.current.onRightClick);
-    kakao.maps.event.addListener(map, "mousemove", listeners.current.onMouseMove);
-    kakao.maps.event.addListener(map, "drag", listeners.current.onDrag);
-    kakao.maps.event.addListener(map, "dragstart", listeners.current.onDragStart);
-    kakao.maps.event.addListener(map, "dragend", listeners.current.onDragEnd);
-    kakao.maps.event.addListener(map, "zoom_start", listeners.current.onZoomStart);
-    kakao.maps.event.addListener(map, "zoom_changed", listeners.current.onZoomChange);
-    kakao.maps.event.addListener(map, "idle", listeners.current.onIdle);
-    kakao.maps.event.addListener(map, "bounds_changed", listeners.current.onBoundsChanged);
-    kakao.maps.event.addListener(map, "tilesloaded", listeners.current.onTilesLoaded);
+  const map = React.useMemo<IKakaoMap>(() => {
+    const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
+    const options: IKakaoMapOptions = {
+      center: latlng,
+      level: props.level,
+    };
+    const $map = new kakao.maps.Map(props.container, options);
 
+    $map.setZoomable(props.zoomable!);
+    $map.setDraggable(props.draggable!);
+    $map.setMaxLevel(props.maxLevel!);
+    $map.setMinLevel(props.minLevel!);
+    $map.setMapTypeId(kakao.maps.MapTypeId[props.baseMapType!]);
+    $map.setCopyrightPosition(kakao.maps.CopyrightPosition[props.copyright!.position], props.copyright!.reverse);
+
+    if (props.cursor) {
+      $map.setCursor(props.cursor);
+    }
+
+    if (props.bounds) {
+      const sw = new kakao.maps.LatLng(props.bounds.value[0].lat, props.bounds.value[0].lng);
+      const ne = new kakao.maps.LatLng(props.bounds.value[1].lat, props.bounds.value[1].lng);
+      const kakaoBounds = new kakao.maps.LatLngBounds(sw, ne);
+      $map.setBounds(kakaoBounds, props.bounds.paddingTop, props.bounds.paddingRight, props.bounds.paddingBottom, props.bounds.paddingLeft);
+    }
+
+    props.overlayMapTypes?.forEach((prevType) => $map.addOverlayMapTypeId(kakao.maps.MapTypeId[prevType]));
+
+    kakao.maps.event.addListener($map, "click", listeners.current.onClick);
+    kakao.maps.event.addListener($map, "dblclick" as any, listeners.current.onDoubleClick);
+    kakao.maps.event.addListener($map, "rightclick", listeners.current.onRightClick);
+    kakao.maps.event.addListener($map, "mousemove", listeners.current.onMouseMove);
+    kakao.maps.event.addListener($map, "drag", listeners.current.onDrag);
+    kakao.maps.event.addListener($map, "dragstart", listeners.current.onDragStart);
+    kakao.maps.event.addListener($map, "dragend", listeners.current.onDragEnd);
+    kakao.maps.event.addListener($map, "zoom_start", listeners.current.onZoomStart);
+    kakao.maps.event.addListener($map, "zoom_changed", listeners.current.onZoomChange);
+    kakao.maps.event.addListener($map, "idle", listeners.current.onIdle);
+    kakao.maps.event.addListener($map, "bounds_changed", listeners.current.onBoundsChanged);
+    kakao.maps.event.addListener($map, "tilesloaded", listeners.current.onTilesLoaded);
+
+    return $map;
+  }, [props.container]);
+
+  React.useEffect(() => {
     return () => {
       kakao.maps.event.removeListener(map, "click", listeners.current.onClick);
       kakao.maps.event.removeListener(map, "dblclick" as any, listeners.current.onDoubleClick);
