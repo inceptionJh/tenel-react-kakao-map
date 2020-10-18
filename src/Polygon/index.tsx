@@ -31,57 +31,10 @@ const Position = PropTypes.shape({
   lng: PropTypes.number.isRequired,
 }).isRequired;
 
-class Polygon extends React.Component<IKakaoMapsPolygonProps> {
-  context!: React.ContextType<typeof MapContext>;
-  static contextType = MapContext;
+function Polygon(props: React.PropsWithChildren<IKakaoMapsPolygonProps>) {
+  const { map } = React.useContext(MapContext);
 
-  private polygon: IKakaoPolygon;
-
-  public static defaultProps = {
-    fillColor: "transparent",
-    fillOpacity: 1,
-    strokeColor: "#000",
-    strokeWeight: 1,
-    strokeOpacity: 1,
-    strokeStyle: "solid",
-    zIndex: 0,
-  };
-
-  public static propTypes = {
-    /** Position : { lat: number, lng: number } */
-    path: PropTypes.oneOfType([
-      PropTypes.arrayOf(Position).isRequired,
-      PropTypes.arrayOf(PropTypes.arrayOf(Position).isRequired).isRequired,
-    ]).isRequired,
-    /** 채움 색 */
-    fillColor: PropTypes.string,
-    /** 채움 색의 불투명도 ( 0 ~ 1 ) */
-    fillOpacity: PropTypes.number,
-    /** 선 색 */
-    strokeColor: PropTypes.string,
-    /** 선 불투명도 ( 0 ~ 1 ) */
-    strokeOpacity: PropTypes.number,
-    /** 선의 두께 ( 단위 : px ) */
-    strokeWeight: PropTypes.number,
-    /** 선 스타일 */
-    strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
-    /** z-index 속성 값 */
-    zIndex: PropTypes.number,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseDown: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseMove: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOver: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOut: PropTypes.func,
-  };
-
-  constructor(props: IKakaoMapsPolygonProps) {
-    super(props);
-
+  const polygon = React.useMemo<IKakaoPolygon>(() => {
     const path = (props.path as any).map((positionOrPath: { lat: number, lng: number } | { lat: number, lng: number }[]) => {
       if ("lat" in positionOrPath) {
         return new kakao.maps.LatLng(positionOrPath.lat, positionOrPath.lng);
@@ -101,83 +54,20 @@ class Polygon extends React.Component<IKakaoMapsPolygonProps> {
       strokeStyle: props.strokeStyle,
       zIndex: props.zIndex,
     };
-    this.polygon = new kakao.maps.Polygon(options);
+    const $polygon = new kakao.maps.Polygon(options);
 
-    kakao.maps.event.addListener(this.polygon, "click", this.onClick);
-    kakao.maps.event.addListener(this.polygon, "mousemove", this.onMouseMove);
-    kakao.maps.event.addListener(this.polygon, "mousedown", this.onMouseDown);
-    kakao.maps.event.addListener(this.polygon, "mouseover", this.onMouseOver);
-    kakao.maps.event.addListener(this.polygon, "mouseout", this.onMouseOut);
-  };
+    return $polygon;
+  }, []);
 
-  public componentDidMount() {
-    this.polygon.setMap(this.context.map);
-  }
+  React.useEffect(() => {
+    polygon.setMap(map);
+    return () => polygon.setMap(null);
+  }, []);
 
-  public componentWillUnmount() {
-    kakao.maps.event.removeListener(this.polygon, "click", this.onClick);
-    kakao.maps.event.removeListener(this.polygon, "mousemove", this.onMouseMove);
-    kakao.maps.event.removeListener(this.polygon, "mousedown", this.onMouseDown);
-    kakao.maps.event.removeListener(this.polygon, "mouseover", this.onMouseOver);
-    kakao.maps.event.removeListener(this.polygon, "mouseout", this.onMouseOut);
+  const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
 
-    this.polygon.setMap(null);
-  }
-
-  public componentWillReceiveProps(nextProps: IKakaoMapsPolygonProps) {
-    const nextPath = nextProps.path.flat(Infinity).map((point: any) => `${point.lat},${point.lng}`).join();
-    const currentPath = this.props.path.flat(Infinity).map((point: any) => `${point.lat},${point.lng}`).join();
-    if (nextPath !== currentPath) {
-      this.polygon.setPath((nextProps.path as any).map((positionOrPath: { lat: number, lng: number } | { lat: number, lng: number }[]) => {
-        if ("lat" in positionOrPath) {
-          return new kakao.maps.LatLng(positionOrPath.lat, positionOrPath.lng);
-        } else {
-          return positionOrPath.map((position) => {
-            return new kakao.maps.LatLng(position.lat, position.lng);
-          });
-        }
-      }));
-    }
-
-    if (nextProps.fillColor !== this.props.fillColor) {
-      this.polygon.setOptions({ fillColor: nextProps.fillColor });
-    }
-
-    if (nextProps.fillOpacity !== this.props.fillOpacity) {
-      this.polygon.setOptions({ fillOpacity: nextProps.fillOpacity });
-    }
-
-    if (nextProps.strokeColor !== this.props.strokeColor) {
-      this.polygon.setOptions({ strokeColor: nextProps.strokeColor });
-    }
-
-    if (nextProps.strokeWeight !== this.props.strokeWeight) {
-      this.polygon.setOptions({ strokeWeight: nextProps.strokeWeight });
-    }
-
-    if (nextProps.strokeOpacity !== this.props.strokeOpacity) {
-      this.polygon.setOptions({ strokeOpacity: nextProps.strokeOpacity });
-    }
-
-    if (nextProps.strokeStyle !== this.props.strokeStyle) {
-      this.polygon.setOptions({ strokeStyle: nextProps.strokeStyle });
-    }
-
-    if (nextProps.zIndex !== this.props.zIndex) {
-      this.polygon.setZIndex(nextProps.zIndex!);
-    }
-  }
-
-  public render() {
-    return (
-      <PolygonContext.Provider value={{ polygon: this.polygon }}>
-        {this.props.children}
-      </PolygonContext.Provider >
-    );
-  }
-
-  private onClick = (e: IKakaoMouseEvent) => {
-    this.props.onClick?.({
+  listeners.current.onClick = function onClick(e: IKakaoMouseEvent) {
+    props.onClick?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -185,8 +75,8 @@ class Polygon extends React.Component<IKakaoMapsPolygonProps> {
     });
   }
 
-  public onMouseMove = (e: IKakaoMouseEvent) => {
-    this.props.onMouseMove?.({
+  listeners.current.onMouseMove = function onMouseMove(e: IKakaoMouseEvent) {
+    props.onMouseMove?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -194,8 +84,8 @@ class Polygon extends React.Component<IKakaoMapsPolygonProps> {
     });
   }
 
-  private onMouseDown = (e: IKakaoMouseEvent) => {
-    this.props.onMouseDown?.({
+  listeners.current.onMouseDown = function onMouseDown(e: IKakaoMouseEvent) {
+    props.onMouseDown?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -203,8 +93,8 @@ class Polygon extends React.Component<IKakaoMapsPolygonProps> {
     });
   }
 
-  private onMouseOver = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOver?.({
+  listeners.current.onMouseOver = function onMouseOver(e: IKakaoMouseEvent) {
+    props.onMouseOver?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -212,14 +102,106 @@ class Polygon extends React.Component<IKakaoMapsPolygonProps> {
     });
   }
 
-  private onMouseOut = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOut?.({
+  listeners.current.onMouseOut = function onMouseOut(e: IKakaoMouseEvent) {
+    props.onMouseOut?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
     });
   }
+
+  React.useEffect(() => {
+    kakao.maps.event.addListener(polygon, "click", listeners.current.onClick);
+    kakao.maps.event.addListener(polygon, "mousemove", listeners.current.onMouseMove);
+    kakao.maps.event.addListener(polygon, "mousedown", listeners.current.onMouseDown);
+    kakao.maps.event.addListener(polygon, "mouseover", listeners.current.onMouseOver);
+    kakao.maps.event.addListener(polygon, "mouseout", listeners.current.onMouseOut);
+
+    return () => {
+      kakao.maps.event.removeListener(polygon, "click", listeners.current.onClick);
+      kakao.maps.event.removeListener(polygon, "mousemove", listeners.current.onMouseMove);
+      kakao.maps.event.removeListener(polygon, "mousedown", listeners.current.onMouseDown);
+      kakao.maps.event.removeListener(polygon, "mouseover", listeners.current.onMouseOver);
+      kakao.maps.event.removeListener(polygon, "mouseout", listeners.current.onMouseOut);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    polygon.setOptions({ fillColor: props.fillColor });
+  }, [props.fillColor]);
+
+  React.useEffect(() => {
+    polygon.setOptions({ fillOpacity: props.fillOpacity });
+  }, [props.fillOpacity]);
+
+  React.useEffect(() => {
+    polygon.setOptions({ strokeColor: props.strokeColor });
+  }, [props.strokeColor]);
+
+  React.useEffect(() => {
+    polygon.setOptions({ strokeWeight: props.strokeWeight });
+  }, [props.strokeWeight]);
+
+  React.useEffect(() => {
+    polygon.setOptions({ strokeOpacity: props.strokeOpacity });
+  }, [props.strokeOpacity]);
+
+  React.useEffect(() => {
+    polygon.setOptions({ strokeStyle: props.strokeStyle });
+  }, [props.strokeStyle]);
+
+  React.useEffect(() => {
+    polygon.setZIndex(props.zIndex!);
+  }, [props.zIndex]);
+
+  return (
+    <PolygonContext.Provider value={{ polygon }}>
+      {props.children}
+    </PolygonContext.Provider >
+  );
+}
+
+Polygon.defaultProps = {
+  fillColor: "transparent",
+  fillOpacity: 1,
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+};
+
+Polygon.propTypes = {
+  /** Position : { lat: number, lng: number } */
+  path: PropTypes.oneOfType([
+    PropTypes.arrayOf(Position).isRequired,
+    PropTypes.arrayOf(PropTypes.arrayOf(Position).isRequired).isRequired,
+  ]).isRequired,
+  /** 채움 색 */
+  fillColor: PropTypes.string,
+  /** 채움 색의 불투명도 ( 0 ~ 1 ) */
+  fillOpacity: PropTypes.number,
+  /** 선 색 */
+  strokeColor: PropTypes.string,
+  /** 선 불투명도 ( 0 ~ 1 ) */
+  strokeOpacity: PropTypes.number,
+  /** 선의 두께 ( 단위 : px ) */
+  strokeWeight: PropTypes.number,
+  /** 선 스타일 */
+  strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
+  /** z-index 속성 값 */
+  zIndex: PropTypes.number,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseDown: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseMove: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOver: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOut: PropTypes.func,
 };
 
 export default Polygon;
