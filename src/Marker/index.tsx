@@ -41,7 +41,7 @@ export interface IKakaoMapsMarkerProps {
   range?: number;
   /** 단위 : m */
   altitude?: number;
-  image?: IKakaoMapsMarkerImage;
+  image?: IKakaoMapsMarkerImage | null;
   onClick?: (e: { position: { lat: number, lng: number } }) => void;
   onRightClick?: (e: { position: { lat: number, lng: number } }) => void;
   onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
@@ -50,234 +50,217 @@ export interface IKakaoMapsMarkerProps {
   onDragEnd?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
-class Marker extends React.Component<IKakaoMapsMarkerProps> {
-  context!: React.ContextType<typeof MapContext>;
-  static contextType = MapContext;
+function Marker(props: React.PropsWithChildren<IKakaoMapsMarkerProps>) {
+  const { map } = React.useContext(MapContext);
 
-  private marker: IKakaoMarker;
-  private markerImage: IKakaoMarkerImage | null;
+  const marker = React.useMemo<IKakaoMarker>(() => {
+    const $marker = new kakao.maps.Marker();
+    return $marker;
+  }, []);
 
-  public static defaultProps = {
-    opacity: 1,
-    visible: true,
-    range: 500,
-    zIndex: 0,
-    altitude: 2,
-    clickable: true,
-    draggable: false,
-  };
+  React.useEffect(() => {
+    marker.setMap(map);
+    return () => marker.setMap(null);
+  }, []);
 
-  public static propTypes = {
-    /** 맵에 표시될 좌표 */
-    position: PropTypes.shape({
-      lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired,
+  const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
+
+  listeners.current.onClick = function onClick() {
+    props.onClick?.({
+      position: {
+        lat: marker.getPosition().getLat(),
+        lng: marker.getPosition().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onRightClick = function onRightClick() {
+    props.onRightClick?.({
+      position: {
+        lat: marker.getPosition().getLat(),
+        lng: marker.getPosition().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onMouseOver = function onMouseOver(e: IKakaoMouseEvent) {
+    props.onMouseOver?.({
+      position: {
+        lat: marker.getPosition().getLat(),
+        lng: marker.getPosition().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onMouseOut = function onMouseOut(e: IKakaoMouseEvent) {
+    props.onMouseOut?.({
+      position: {
+        lat: marker.getPosition().getLat(),
+        lng: marker.getPosition().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onDragStart = function onDragStart() {
+    props.onDragStart?.({
+      position: {
+        lat: marker.getPosition().getLat(),
+        lng: marker.getPosition().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onDragEnd = function onDragEnd() {
+    props.onDragEnd?.({
+      position: {
+        lat: marker.getPosition().getLat(),
+        lng: marker.getPosition().getLng(),
+      },
+    });
+  }
+
+  React.useEffect(() => {
+    kakao.maps.event.addListener(marker, "click", listeners.current.onClick);
+    kakao.maps.event.addListener(marker, "rightclick", listeners.current.onRightClick);
+    kakao.maps.event.addListener(marker, "mouseover", listeners.current.onMouseOver);
+    kakao.maps.event.addListener(marker, "mouseout", listeners.current.onMouseOut);
+    kakao.maps.event.addListener(marker, "dragstart", listeners.current.onDragStart);
+    kakao.maps.event.addListener(marker, "dragend", listeners.current.onDragEnd);
+
+    return () => {
+      kakao.maps.event.removeListener(marker, "click", listeners.current.onClick);
+      kakao.maps.event.removeListener(marker, "rightclick", listeners.current.onRightClick);
+      kakao.maps.event.removeListener(marker, "mouseover", listeners.current.onMouseOver);
+      kakao.maps.event.removeListener(marker, "mouseout", listeners.current.onMouseOut);
+      kakao.maps.event.removeListener(marker, "dragstart", listeners.current.onDragStart);
+      kakao.maps.event.removeListener(marker, "dragend", listeners.current.onDragEnd);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const latlng = new kakao.maps.LatLng(props.position.lat, props.position.lng);
+    marker.setPosition(latlng);
+  }, [props.position.lat, props.position.lng]);
+
+  React.useEffect(() => {
+    marker.setClickable(props.clickable!);
+  }, [props.clickable]);
+
+  React.useEffect(() => {
+    marker.setDraggable(props.draggable!);
+  }, [props.draggable]);
+
+  React.useEffect(() => {
+    marker.setVisible(props.visible!);
+  }, [props.visible]);
+
+  React.useEffect(() => {
+    marker.setTitle(props.title ?? "");
+  }, [props.title]);
+
+  React.useEffect(() => {
+    marker.setOpacity(props.opacity!);
+  }, [props.opacity]);
+
+  React.useEffect(() => {
+    marker.setRange(props.range!);
+  }, [props.range]);
+
+  React.useEffect(() => {
+    marker.setAltitude(props.altitude!);
+  }, [props.altitude]);
+
+  React.useEffect(() => {
+    marker.setZIndex(props.zIndex!);
+  }, [props.zIndex]);
+
+  React.useEffect(() => {
+    if (!props.image) return marker.setImage(null as any);
+
+    const size = new kakao.maps.Size(props.image.size.width, props.image.size.height);
+
+    const offset = props.image.options.offset ? new kakao.maps.Point(props.image.options.offset.x, props.image.options.offset.y) : undefined;
+    const spriteOrigin = props.image.options.spriteOrigin ? new kakao.maps.Point(props.image.options.spriteOrigin.x, props.image.options.spriteOrigin.y) : undefined;
+    const spriteSize = props.image.options.spriteSize ? new kakao.maps.Size(props.image.options.spriteSize.width, props.image.options.spriteSize.height) : undefined;
+
+    const options: IKakaoMarkerImageOptions = {
+      ...props.image.options,
+      offset,
+      spriteOrigin,
+      spriteSize,
+    };
+    const $markerImage = new kakao.maps.MarkerImage(props.image.src, size, options);
+
+    marker.setImage($markerImage);
+  }, [props.image, props.image?.src, props.image?.size.width, props.image?.size.height]);
+
+  return (
+    <MarkerContext.Provider value={{ marker }}>
+      {props.children}
+    </MarkerContext.Provider >
+  );
+}
+
+Marker.defaultProps = {
+  opacity: 1,
+  visible: true,
+  range: 500,
+  zIndex: 0,
+  altitude: 2,
+  clickable: true,
+  draggable: false,
+};
+
+Marker.propTypes = {
+  /** 맵에 표시될 좌표 */
+  position: PropTypes.shape({
+    lat: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired,
+  }).isRequired,
+  /** 기본 마커 대신 사용할 이미지 */
+  image: PropTypes.shape({
+    src: PropTypes.string.isRequired,
+    size: PropTypes.shape({
+      width: PropTypes.number.isRequired,
+      height: PropTypes.number.isRequired,
     }).isRequired,
-    /** 기본 마커 대신 사용할 이미지 */
-    image: PropTypes.shape({
-      src: PropTypes.string.isRequired,
-      size: PropTypes.shape({
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
-      }).isRequired,
-      options: PropTypes.shape({
-        alt: PropTypes.string,
-        coords: PropTypes.string,
-        shape: PropTypes.string,
-        offset: PropTypes.shape({ x: PropTypes.number.isRequired, y: PropTypes.number.isRequired }),
-        spriteOrigin: PropTypes.shape({ x: PropTypes.number.isRequired, y: PropTypes.number.isRequired }),
-        spriteSize: PropTypes.shape({ width: PropTypes.number.isRequired, height: PropTypes.number.isRequired }),
-      }).isRequired,
-    }),
-    /** 툴팁 */
-    title: PropTypes.string,
-    /** 불투명도 ( 0 ~ 1 ) */
-    opacity: PropTypes.number,
-    /** 드래그 가능 여부 */
-    draggable: PropTypes.bool,
-    /** 클릭 가능 여부 */
-    clickable: PropTypes.bool,
-    /** 노출 여부 */
-    visible: PropTypes.bool,
-    /** z-index 속성 값 */
-    zIndex: PropTypes.number,
-    /** 표시될 최대 거리 ( 로드맵 only ) */
-    range: PropTypes.number,
-    /** 고도 ( 로드맵 only ) */
-    altitude: PropTypes.number,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onRightClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onDragStart: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onDragEnd: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOver: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOut: PropTypes.func,
-  };
-
-  constructor(props: IKakaoMapsMarkerProps) {
-    super(props);
-
-    this.marker = new kakao.maps.Marker();
-
-    kakao.maps.event.addListener(this.marker, "click", this.onClick);
-    kakao.maps.event.addListener(this.marker, "rightclick", this.onRightClick);
-    kakao.maps.event.addListener(this.marker, "mouseover", this.onMouseOver);
-    kakao.maps.event.addListener(this.marker, "mouseout", this.onMouseOut);
-    kakao.maps.event.addListener(this.marker, "dragstart", this.onDragStart);
-    kakao.maps.event.addListener(this.marker, "dragend", this.onDragEnd);
-
-    this.markerImage = null;
-
-    if (this.props.image) {
-      const size = new kakao.maps.Size(this.props.image.size.width, this.props.image.size.height);
-
-      const offset = this.props.image.options.offset ? new kakao.maps.Point(this.props.image.options.offset.x, this.props.image.options.offset.y) : undefined;
-      const spriteOrigin = this.props.image.options.spriteOrigin ? new kakao.maps.Point(this.props.image.options.spriteOrigin.x, this.props.image.options.spriteOrigin.y) : undefined;
-      const spriteSize = this.props.image.options.spriteSize ? new kakao.maps.Size(this.props.image.options.spriteSize.width, this.props.image.options.spriteSize.height) : undefined;
-
-      const options: IKakaoMarkerImageOptions = {
-        ...this.props.image.options,
-        offset,
-        spriteOrigin,
-        spriteSize,
-      };
-      this.markerImage = new kakao.maps.MarkerImage(this.props.image.src, size, options);
-    }
-  }
-
-  public componentDidMount() {
-    this.marker.setMap(this.context.map);
-    this.marker.setPosition(new kakao.maps.LatLng(this.props.position.lat, this.props.position.lng));
-  }
-
-  public componentWillUnmount() {
-    kakao.maps.event.removeListener(this.marker, "click", this.onClick);
-    kakao.maps.event.removeListener(this.marker, "rightclick", this.onRightClick);
-    kakao.maps.event.removeListener(this.marker, "mouseover", this.onMouseOver);
-    kakao.maps.event.removeListener(this.marker, "mouseout", this.onMouseOut);
-    kakao.maps.event.removeListener(this.marker, "dragstart", this.onDragStart);
-    kakao.maps.event.removeListener(this.marker, "dragend", this.onDragEnd);
-
-    this.marker.setMap(null);
-  }
-
-  public componentWillReceiveProps(nextProps: IKakaoMapsMarkerProps) {
-    if (nextProps.position.lat !== this.props.position.lat || nextProps.position.lng !== this.props.position.lng) {
-      const latlng = new kakao.maps.LatLng(nextProps.position.lat, nextProps.position.lng);
-      this.marker.setPosition(latlng);
-    }
-
-    if (nextProps.clickable !== this.props.clickable) {
-      this.marker.setClickable(nextProps.clickable!);
-    }
-
-    if (nextProps.draggable !== this.props.draggable) {
-      this.marker.setDraggable(nextProps.draggable!);
-    }
-
-    if (nextProps.visible !== this.props.visible) {
-      this.marker.setVisible(nextProps.visible!);
-    }
-
-    if (nextProps.title !== this.props.title) {
-      this.marker.setTitle(nextProps.title!);
-    }
-
-    if (nextProps.opacity !== this.props.opacity) {
-      this.marker.setOpacity(nextProps.opacity!);
-    }
-
-    if (nextProps.range !== this.props.range) {
-      this.marker.setRange(nextProps.range!);
-    }
-
-    if (nextProps.altitude !== this.props.altitude) {
-      this.marker.setAltitude(nextProps.altitude!);
-    }
-
-    if (nextProps.zIndex !== this.props.zIndex) {
-      this.marker.setZIndex(nextProps.zIndex!);
-    }
-
-    if (nextProps.image !== this.props.image) {
-      this.marker.setImage(nextProps.image!);
-    }
-
-    if (nextProps.zIndex !== this.props.zIndex) {
-      this.marker.setZIndex(nextProps.zIndex!);
-    }
-
-    if (nextProps.zIndex !== this.props.zIndex) {
-      this.marker.setZIndex(nextProps.zIndex!);
-    }
-  }
-
-  public render() {
-    return (
-      <MarkerContext.Provider value={{ marker: this.marker }}>
-        {this.props.children}
-      </MarkerContext.Provider >
-    );
-  }
-
-  private onClick = (e: IKakaoMouseEvent) => {
-    this.props.onClick?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
-    })
-  }
-
-  private onRightClick = (e: IKakaoMouseEvent) => {
-    this.props.onRightClick?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
-    })
-  }
-
-  private onMouseOver = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOver?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
-    })
-  }
-
-  private onMouseOut = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOut?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
-    })
-  }
-
-  private onDragStart = (e: IKakaoMouseEvent) => {
-    this.props.onDragStart?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
-    })
-  }
-
-  private onDragEnd = (e: IKakaoMouseEvent) => {
-    this.props.onDragEnd?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
-    })
-  }
+    options: PropTypes.shape({
+      alt: PropTypes.string,
+      coords: PropTypes.string,
+      shape: PropTypes.string,
+      offset: PropTypes.shape({ x: PropTypes.number.isRequired, y: PropTypes.number.isRequired }),
+      spriteOrigin: PropTypes.shape({ x: PropTypes.number.isRequired, y: PropTypes.number.isRequired }),
+      spriteSize: PropTypes.shape({ width: PropTypes.number.isRequired, height: PropTypes.number.isRequired }),
+    }).isRequired,
+  }),
+  /** 툴팁 */
+  title: PropTypes.string,
+  /** 불투명도 ( 0 ~ 1 ) */
+  opacity: PropTypes.number,
+  /** 드래그 가능 여부 */
+  draggable: PropTypes.bool,
+  /** 클릭 가능 여부 */
+  clickable: PropTypes.bool,
+  /** 노출 여부 */
+  visible: PropTypes.bool,
+  /** z-index 속성 값 */
+  zIndex: PropTypes.number,
+  /** 표시될 최대 거리 ( 로드맵 only ) */
+  range: PropTypes.number,
+  /** 고도 ( 로드맵 only ) */
+  altitude: PropTypes.number,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onRightClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDragStart: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDragEnd: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOver: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOut: PropTypes.func,
 };
 
 export default Marker;
