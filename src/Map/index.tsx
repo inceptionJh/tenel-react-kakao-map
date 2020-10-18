@@ -63,251 +63,42 @@ const Position = PropTypes.shape({
   lng: PropTypes.number.isRequired,
 }).isRequired;
 
-class KakaoMap extends React.Component<IKakaoMapsMapProps> {
-  private map: IKakaoMap;
-
-  public static defaultProps = {
-    zoomable: true,
-    draggable: true,
-    copyright: { position: "BOTTOMLEFT", reverse: false },
-    level: 3,
-    minLevel: 1,
-    maxLevel: 14,
-    levelDuration: 300,
-    baseMapType: "ROADMAP",
-    overlayMapTypes: [],
-  };
-
-  public static propTypes = {
-    /** 지도가 표시될 HTML element */
-    container: PropTypes.instanceOf(HTMLElement).isRequired,
-    /** 지도의 중심 좌표 */
-    center: Position,
-    /** 커서 모양 */
-    cursor: PropTypes.string,
-    /** 최대 확대/축소 수준 */
-    maxLevel: PropTypes.number,
-    /** 최소 확대/축소 수준 */
-    minLevel: PropTypes.number,
-    /** 확대/축소 수준 */
-    level: PropTypes.number,
-    /** 확대/축소 트렌지션 시간 ( 단위 : ms ) */
-    levelDuration: PropTypes.number,
-    /** 지도의 타입을 설정 */
-    baseMapType: PropTypes.oneOf(["ROADMAP", "SKYVIEW", "HYBRID"]),
-    /** 지도에 오버레이할 타입을 설정 */
-    overlayMapTypes: PropTypes.arrayOf(PropTypes.oneOf(["OVERLAY", "ROADVIEW", "TRAFFIC", "TERRAIN", "BICYCLE", "BICYCLE_HYBRID", "USE_DISTRICT"] as const).isRequired),
-    /** 확대/축소 가능 여부 */
-    zoomable: PropTypes.bool,
-    /** 드래그 가능 여부 */
-    draggable: PropTypes.bool,
-    /** Copyright 위치 및 반전 */
-    copyright: PropTypes.shape({
-      position: PropTypes.oneOf(["BOTTOMLEFT", "BOTTOMRIGHT"] as const).isRequired,
-      reverse: PropTypes.bool,
-    }),
-    /** 주어진 영역이 화면 안에 전부 나타날 수 있도록 지도의 중심 좌표와 확대 수준을 설정 */
-    bounds: PropTypes.shape({
-      value: PropTypes.arrayOf(Position).isRequired as PropTypes.Validator<[
-        PropTypes.InferProps<{
-          lat: PropTypes.Validator<number>;
-          lng: PropTypes.Validator<number>;
-        }>,
-        PropTypes.InferProps<{
-          lat: PropTypes.Validator<number>;
-          lng: PropTypes.Validator<number>;
-        }>
-      ]>,
-      paddingTop: PropTypes.number,
-      paddingRight: PropTypes.number,
-      paddingBottom: PropTypes.number,
-      paddingLeft: PropTypes.number,
-    }),
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onDoubleClick: PropTypes.func,
-    /** () => void */
-    onRightClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseMove: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onDrag: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onDragStart: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onDragEnd: PropTypes.func,
-    /** (e: { zoomLevel: number }) => void */
-    onZoomStart: PropTypes.func,
-    /** (e: { zoomLevel: number }) => void */
-    onZoomChange: PropTypes.func,
-    /** (e: { zoomLevel: number, position: { lat: number, lng: number }, bounds: [{lat: number, lng: number}, {lat: number, lng: number}] }) => void */
-    onIdle: PropTypes.func,
-    /** () => void */
-    onBoundsChanged: PropTypes.func,
-    /** () => void */
-    onTilesLoaded: PropTypes.func,
-  };
-
-  constructor(props: IKakaoMapsMapProps) {
-    super(props);
-
+function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
+  const map = React.useMemo<IKakaoMap>(() => {
     const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
     const options: IKakaoMapOptions = {
       center: latlng,
       level: props.level,
     };
-    this.map = new kakao.maps.Map(props.container, options);
+    const $map = new kakao.maps.Map(props.container, options);
 
-    this.map.setZoomable(this.props.zoomable!);
-    this.map.setDraggable(this.props.draggable!);
-    this.map.setMaxLevel(this.props.maxLevel!);
-    this.map.setMinLevel(this.props.minLevel!);
-    this.map.setMapTypeId(kakao.maps.MapTypeId[this.props.baseMapType!]);
-    this.map.setCopyrightPosition(kakao.maps.CopyrightPosition[this.props.copyright!.position], this.props.copyright!.reverse);
+    $map.setZoomable(props.zoomable!);
+    $map.setDraggable(props.draggable!);
+    $map.setMaxLevel(props.maxLevel!);
+    $map.setMinLevel(props.minLevel!);
+    $map.setMapTypeId(kakao.maps.MapTypeId[props.baseMapType!]);
+    $map.setCopyrightPosition(kakao.maps.CopyrightPosition[props.copyright!.position], props.copyright!.reverse);
 
-    if (this.props.cursor) {
-      this.map.setCursor(this.props.cursor);
+    if (props.cursor) {
+      $map.setCursor(props.cursor);
     }
 
-    if (this.props.bounds) {
-      const sw = new kakao.maps.LatLng(this.props.bounds.value[0].lat, this.props.bounds.value[0].lng);
-      const ne = new kakao.maps.LatLng(this.props.bounds.value[1].lat, this.props.bounds.value[1].lng);
+    if (props.bounds) {
+      const sw = new kakao.maps.LatLng(props.bounds.value[0].lat, props.bounds.value[0].lng);
+      const ne = new kakao.maps.LatLng(props.bounds.value[1].lat, props.bounds.value[1].lng);
       const kakaoBounds = new kakao.maps.LatLngBounds(sw, ne);
-      this.map.setBounds(kakaoBounds, this.props.bounds.paddingTop, this.props.bounds.paddingRight, this.props.bounds.paddingBottom, this.props.bounds.paddingLeft);
+      $map.setBounds(kakaoBounds, props.bounds.paddingTop, props.bounds.paddingRight, props.bounds.paddingBottom, props.bounds.paddingLeft);
     }
 
-    this.props.overlayMapTypes?.forEach((prevType) => this.map.addOverlayMapTypeId(kakao.maps.MapTypeId[prevType]));
+    props.overlayMapTypes?.forEach((prevType) => $map.addOverlayMapTypeId(kakao.maps.MapTypeId[prevType]));
 
-    kakao.maps.event.addListener(this.map, "click", this.onClick);
-    kakao.maps.event.addListener(this.map, "dbclick", this.onDoubleClick);
-    kakao.maps.event.addListener(this.map, "rightclick", this.onRightClick);
-    kakao.maps.event.addListener(this.map, "mousemove", this.onMouseMove);
-    kakao.maps.event.addListener(this.map, "drag", this.onDrag);
-    kakao.maps.event.addListener(this.map, "dragstart", this.onDragStart);
-    kakao.maps.event.addListener(this.map, "dragend", this.onDragEnd);
-    kakao.maps.event.addListener(this.map, "zoom_start", this.onZoomStart);
-    kakao.maps.event.addListener(this.map, "zoom_changed", this.onZoomChange);
-    kakao.maps.event.addListener(this.map, "idle", this.onIdle);
-    kakao.maps.event.addListener(this.map, "bounds_changed", this.onBoundsChanged);
-    kakao.maps.event.addListener(this.map, "tilesloaded", this.onTilesLoaded);
-  }
+    return $map;
+  }, [props.container]);
 
-  public componentWillUnmount() {
-    kakao.maps.event.removeListener(this.map, "click", this.onClick);
-    kakao.maps.event.removeListener(this.map, "dbclick", this.onDoubleClick);
-    kakao.maps.event.removeListener(this.map, "rightclick", this.onRightClick);
-    kakao.maps.event.removeListener(this.map, "mousemove", this.onMouseMove);
-    kakao.maps.event.removeListener(this.map, "drag", this.onDrag);
-    kakao.maps.event.removeListener(this.map, "dragstart", this.onDragStart);
-    kakao.maps.event.removeListener(this.map, "dragend", this.onDragEnd);
-    kakao.maps.event.removeListener(this.map, "zoom_start", this.onZoomStart);
-    kakao.maps.event.removeListener(this.map, "zoom_changed", this.onZoomChange);
-    kakao.maps.event.removeListener(this.map, "idle", this.onIdle);
-    kakao.maps.event.removeListener(this.map, "bounds_changed", this.onBoundsChanged);
-    kakao.maps.event.removeListener(this.map, "tilesloaded", this.onTilesLoaded);
-  }
+  const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
 
-  public componentWillReceiveProps(nextProps: IKakaoMapsMapProps) {
-    if (nextProps.center.lat !== this.props.center.lat || nextProps.center.lng !== this.props.center.lng) {
-      const latlng = new kakao.maps.LatLng(nextProps.center.lat, nextProps.center.lng);
-      this.map.setCenter(latlng);
-    }
-
-    if (nextProps.draggable !== this.props.draggable) {
-      this.map.setDraggable(nextProps.draggable!);
-    }
-
-    if (nextProps.cursor !== this.props.cursor) {
-      if (nextProps.cursor !== undefined) {
-        this.map.setCursor(nextProps.cursor);
-      }
-    }
-
-    if ([
-      nextProps.bounds?.value.flat(Infinity).join() !== this.props.bounds?.value.flat(Infinity).join(),
-      nextProps.bounds?.paddingTop !== this.props.bounds?.paddingTop,
-      nextProps.bounds?.paddingRight !== this.props.bounds?.paddingRight,
-      nextProps.bounds?.paddingBottom !== this.props.bounds?.paddingBottom,
-      nextProps.bounds?.paddingLeft !== this.props.bounds?.paddingLeft,
-    ].some((v) => v)) {
-      if (!nextProps.bounds) return;
-      const sw = new kakao.maps.LatLng(nextProps.bounds.value[0].lat, nextProps.bounds.value[0].lng);
-      const ne = new kakao.maps.LatLng(nextProps.bounds.value[1].lat, nextProps.bounds.value[1].lng);
-      const kakaoBounds = new kakao.maps.LatLngBounds(sw, ne);
-      this.map.setBounds(kakaoBounds, nextProps.bounds.paddingTop, nextProps.bounds.paddingRight, nextProps.bounds.paddingBottom, nextProps.bounds.paddingLeft);
-    }
-
-    if (nextProps.baseMapType !== this.props.baseMapType) {
-      this.map.setMapTypeId(kakao.maps.MapTypeId[nextProps.baseMapType!]);
-    }
-
-    if (nextProps.overlayMapTypes?.sort().join() !== this.props.overlayMapTypes?.sort().join()) {
-      this.props.overlayMapTypes?.forEach((prevType) => {
-        if (!(nextProps.overlayMapTypes?.includes(prevType))) {
-          this.map.removeOverlayMapTypeId(kakao.maps.MapTypeId[prevType]);
-        }
-      });
-
-      nextProps.overlayMapTypes?.forEach((currType) => {
-        if (!(this.props.overlayMapTypes?.includes(currType))) {
-          this.map.addOverlayMapTypeId(kakao.maps.MapTypeId[currType]);
-        }
-      });
-    }
-
-    if ([
-      nextProps.copyright?.reverse !== this.props.copyright?.reverse,
-      nextProps.copyright?.position !== this.props.copyright?.position,
-    ].some((v) => v)) {
-      this.map.setCopyrightPosition(kakao.maps.CopyrightPosition[nextProps.copyright!.position], nextProps.copyright!.reverse);
-    }
-
-    if (nextProps.zoomable !== this.props.zoomable) {
-      this.map.setZoomable(nextProps.zoomable!);
-    }
-
-    if (nextProps.maxLevel !== this.props.maxLevel) {
-      this.map.setMaxLevel(nextProps.maxLevel!);
-    }
-
-    if (nextProps.minLevel !== this.props.minLevel) {
-      this.map.setMinLevel(nextProps.minLevel!);
-    }
-
-    if (nextProps.level !== this.props.level) {
-      const options = {
-        anchor: undefined,
-        animate: nextProps.levelDuration ? { duration: nextProps.levelDuration } : undefined
-      };
-      this.map.setLevel(nextProps.level!, options);
-    }
-
-    if (nextProps.maxLevel !== this.props.maxLevel) {
-      if (nextProps.level! > nextProps.maxLevel!) {
-        this.map.setLevel(nextProps.maxLevel!);
-        kakao.maps.event.trigger(this.map, "idle", {});
-      }
-    }
-
-    if (nextProps.minLevel !== this.props.minLevel) {
-      if (nextProps.level! < nextProps.minLevel!) {
-        this.map.setLevel(nextProps.minLevel!);
-        kakao.maps.event.trigger(this.map, "idle", {});
-      }
-    }
-  }
-
-  public render() {
-    return (
-      <KakaoMapContext.Provider value={{ map: this.map }}>
-        {this.props.children}
-      </KakaoMapContext.Provider>
-    );
-  }
-
-  private onClick = (e: IKakaoMouseEvent) => {
-    this.props.onClick?.({
+  listeners.current.onClick = function onClick(e: IKakaoMouseEvent) {
+    props.onClick?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -315,94 +106,284 @@ class KakaoMap extends React.Component<IKakaoMapsMapProps> {
     });
   }
 
-  private onDoubleClick = (e: IKakaoMouseEvent) => {
-    this.props.onDoubleClick?.({
+  listeners.current.onDoubleClick = function onDoubleClick(e: IKakaoMouseEvent) {
+    props.onDoubleClick?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
-      }
+      },
     });
   }
 
-  private onRightClick = (e: IKakaoMouseEvent) => {
-    this.props.onRightClick?.({
+  listeners.current.onRightClick = function onRightClick(e: IKakaoMouseEvent) {
+    props.onRightClick?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
-      }
-    })
-  }
-
-  private onDrag = () => {
-    this.props.onDrag?.({
-      position: {
-        lat: this.map.getCenter().getLat(),
-        lng: this.map.getCenter().getLng(),
-      }
-    })
-  }
-
-  private onDragStart = () => {
-    this.props.onDragStart?.({
-      position: {
-        lat: this.map.getCenter().getLat(),
-        lng: this.map.getCenter().getLng(),
-      }
-    })
-  }
-
-  private onDragEnd = () => {
-    this.props.onDragEnd?.({
-      position: {
-        lat: this.map.getCenter().getLat(),
-        lng: this.map.getCenter().getLng(),
-      }
-    })
-  }
-
-  private onMouseMove = (e: IKakaoMouseEvent) => {
-    this.props.onMouseMove?.({
-      position: {
-        lat: e.latLng.getLat(),
-        lng: e.latLng.getLng(),
-      }
+      },
     });
   }
 
-  private onZoomStart = () => {
-    this.props.onZoomStart?.({ zoomLevel: this.map.getLevel() });
-  }
-
-  private onZoomChange = () => {
-    this.props.onZoomChange?.({ zoomLevel: this.map.getLevel() });
-  }
-
-  private onIdle = () => {
-    this.props.onIdle?.({
-      zoomLevel: this.map.getLevel(),
+  listeners.current.onMouseMove = function onMouseMove(e: IKakaoMouseEvent) {
+    props.onMouseMove?.({
       position: {
-        lat: this.map.getCenter().getLat(),
-        lng: this.map.getCenter().getLng(),
+        lat: e.latLng.getLat(),
+        lng: e.latLng.getLng(),
+      },
+    });
+  }
+
+  listeners.current.onDrag = function onDrag() {
+    props.onDrag?.({
+      position: {
+        lat: map.getCenter().getLat(),
+        lng: map.getCenter().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onDragStart = function onDragStart() {
+    props.onDragStart?.({
+      position: {
+        lat: map.getCenter().getLat(),
+        lng: map.getCenter().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onDragEnd = function onDragEnd() {
+    props.onDragEnd?.({
+      position: {
+        lat: map.getCenter().getLat(),
+        lng: map.getCenter().getLng(),
+      },
+    });
+  }
+
+  listeners.current.onZoomStart = function onZoomStart() {
+    props.onZoomStart?.({ zoomLevel: map.getLevel() });
+  }
+
+  listeners.current.onZoomChange = function onZoomChange() {
+    props.onZoomChange?.({ zoomLevel: map.getLevel() });
+  }
+
+  listeners.current.onIdle = function onIdle() {
+    props.onIdle?.({
+      zoomLevel: map.getLevel(),
+      position: {
+        lat: map.getCenter().getLat(),
+        lng: map.getCenter().getLng(),
       },
       bounds: [
-        { lat: this.map.getBounds().getSouthWest().getLat(), lng: this.map.getBounds().getSouthWest().getLng() },
-        { lat: this.map.getBounds().getNorthEast().getLat(), lng: this.map.getBounds().getNorthEast().getLng() },
+        { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
+        { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
       ],
     });
   }
 
-  private onBoundsChanged = () => {
-    this.props.onBoundsChanged?.({
+  listeners.current.onBoundsChanged = function onBoundsChanged() {
+    props.onBoundsChanged?.({
       bounds: [
-        { lat: this.map.getBounds().getSouthWest().getLat(), lng: this.map.getBounds().getSouthWest().getLng() },
-        { lat: this.map.getBounds().getNorthEast().getLat(), lng: this.map.getBounds().getNorthEast().getLng() },
+        { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
+        { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
       ],
     });
   }
 
-  private onTilesLoaded = () => {
-    this.props.onTilesLoaded?.();
+  listeners.current.onTilesLoaded = function onTilesLoaded() {
+    props.onTilesLoaded?.();
   }
+
+  React.useEffect(() => {
+    kakao.maps.event.addListener(map, "click", listeners.current.onClick);
+    kakao.maps.event.addListener(map, "dblclick" as any, listeners.current.onDoubleClick);
+    kakao.maps.event.addListener(map, "rightclick", listeners.current.onRightClick);
+    kakao.maps.event.addListener(map, "mousemove", listeners.current.onMouseMove);
+    kakao.maps.event.addListener(map, "drag", listeners.current.onDrag);
+    kakao.maps.event.addListener(map, "dragstart", listeners.current.onDragStart);
+    kakao.maps.event.addListener(map, "dragend", listeners.current.onDragEnd);
+    kakao.maps.event.addListener(map, "zoom_start", listeners.current.onZoomStart);
+    kakao.maps.event.addListener(map, "zoom_changed", listeners.current.onZoomChange);
+    kakao.maps.event.addListener(map, "idle", listeners.current.onIdle);
+    kakao.maps.event.addListener(map, "bounds_changed", listeners.current.onBoundsChanged);
+    kakao.maps.event.addListener(map, "tilesloaded", listeners.current.onTilesLoaded);
+
+    return () => {
+      kakao.maps.event.removeListener(map, "click", listeners.current.onClick);
+      kakao.maps.event.removeListener(map, "dblclick" as any, listeners.current.onDoubleClick);
+      kakao.maps.event.removeListener(map, "rightclick", listeners.current.onRightClick);
+      kakao.maps.event.removeListener(map, "mousemove", listeners.current.onMouseMove);
+      kakao.maps.event.removeListener(map, "drag", listeners.current.onDrag);
+      kakao.maps.event.removeListener(map, "dragstart", listeners.current.onDragStart);
+      kakao.maps.event.removeListener(map, "dragend", listeners.current.onDragEnd);
+      kakao.maps.event.removeListener(map, "zoom_start", listeners.current.onZoomStart);
+      kakao.maps.event.removeListener(map, "zoom_changed", listeners.current.onZoomChange);
+      kakao.maps.event.removeListener(map, "idle", listeners.current.onIdle);
+      kakao.maps.event.removeListener(map, "bounds_changed", listeners.current.onBoundsChanged);
+      kakao.maps.event.removeListener(map, "tilesloaded", listeners.current.onTilesLoaded);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
+    map.setCenter(latlng);
+  }, [props.center.lat, props.center.lng]);
+
+  React.useEffect(() => {
+    map.setDraggable(props.draggable!);
+  }, [props.draggable]);
+
+  React.useEffect(() => {
+    if (props.cursor) map.setCursor(props.cursor);
+  }, [props.cursor]);
+
+  React.useEffect(() => {
+    if (!props.bounds) return;
+    const sw = new kakao.maps.LatLng(props.bounds.value[0].lat, props.bounds.value[0].lng);
+    const ne = new kakao.maps.LatLng(props.bounds.value[1].lat, props.bounds.value[1].lng);
+    const kakaoBounds = new kakao.maps.LatLngBounds(sw, ne);
+    map.setBounds(kakaoBounds, props.bounds.paddingTop, props.bounds.paddingRight, props.bounds.paddingBottom, props.bounds.paddingLeft);
+  }, [props.bounds?.value.flat(Infinity).join(), props.bounds?.paddingTop, props.bounds?.paddingRight, props.bounds?.paddingBottom, props.bounds?.paddingLeft]);
+
+  React.useEffect(() => {
+    map.setMapTypeId(kakao.maps.MapTypeId[props.baseMapType!]);
+  }, [props.baseMapType]);
+
+  React.useEffect(() => {
+    props.overlayMapTypes?.forEach((prevType) => {
+      if (!(props.overlayMapTypes?.includes(prevType))) {
+        map.removeOverlayMapTypeId(kakao.maps.MapTypeId[prevType]);
+      }
+    });
+
+    props.overlayMapTypes?.forEach((currType) => {
+      if (!(props.overlayMapTypes?.includes(currType))) {
+        map.addOverlayMapTypeId(kakao.maps.MapTypeId[currType]);
+      }
+    });
+  }, [props.overlayMapTypes?.sort().join()]);
+
+  React.useEffect(() => {
+    map.setCopyrightPosition(kakao.maps.CopyrightPosition[props.copyright!.position], props.copyright!.reverse);
+  }, [props.copyright?.reverse, props.copyright?.position]);
+
+  React.useEffect(() => {
+    map.setZoomable(props.zoomable!);
+  }, [props.zoomable]);
+
+  React.useEffect(() => {
+    if (props.level! > props.maxLevel!) {
+      map.setLevel(props.maxLevel!);
+      kakao.maps.event.trigger(map, "idle", {});
+    }
+    map.setMaxLevel(props.maxLevel!);
+  }, [props.maxLevel]);
+
+  React.useEffect(() => {
+    if (props.level! < props.minLevel!) {
+      map.setLevel(props.minLevel!);
+      kakao.maps.event.trigger(map, "idle", {});
+    }
+    map.setMinLevel(props.minLevel!);
+  }, [props.minLevel]);
+
+  React.useEffect(() => {
+    const options = {
+      anchor: undefined,
+      animate: props.levelDuration ? { duration: props.levelDuration } : undefined
+    };
+    map.setLevel(props.level!, options);
+  }, [props.levelDuration, props.level]);
+
+  return (
+    <KakaoMapContext.Provider value={{ map }}>
+      {props.children}
+    </KakaoMapContext.Provider>
+  );
+}
+
+KakaoMap.defaultProps = {
+  zoomable: true,
+  draggable: true,
+  copyright: { position: "BOTTOMLEFT", reverse: false },
+  level: 3,
+  minLevel: 1,
+  maxLevel: 14,
+  levelDuration: 300,
+  baseMapType: "ROADMAP",
+  overlayMapTypes: [],
+};
+
+KakaoMap.propTypes = {
+  /** 지도가 표시될 HTML element */
+  container: PropTypes.instanceOf(HTMLElement).isRequired,
+  /** 지도의 중심 좌표 */
+  center: Position,
+  /** 커서 모양 */
+  cursor: PropTypes.string,
+  /** 최대 확대/축소 수준 */
+  maxLevel: PropTypes.number,
+  /** 최소 확대/축소 수준 */
+  minLevel: PropTypes.number,
+  /** 확대/축소 수준 */
+  level: PropTypes.number,
+  /** 확대/축소 트렌지션 시간 ( 단위 : ms ) */
+  levelDuration: PropTypes.number,
+  /** 지도의 타입을 설정 */
+  baseMapType: PropTypes.oneOf(["ROADMAP", "SKYVIEW", "HYBRID"]),
+  /** 지도에 오버레이할 타입을 설정 */
+  overlayMapTypes: PropTypes.arrayOf(PropTypes.oneOf(["OVERLAY", "ROADVIEW", "TRAFFIC", "TERRAIN", "BICYCLE", "BICYCLE_HYBRID", "USE_DISTRICT"] as const).isRequired),
+  /** 확대/축소 가능 여부 */
+  zoomable: PropTypes.bool,
+  /** 드래그 가능 여부 */
+  draggable: PropTypes.bool,
+  /** Copyright 위치 및 반전 */
+  copyright: PropTypes.shape({
+    position: PropTypes.oneOf(["BOTTOMLEFT", "BOTTOMRIGHT"] as const).isRequired,
+    reverse: PropTypes.bool,
+  }),
+  /** 주어진 영역이 화면 안에 전부 나타날 수 있도록 지도의 중심 좌표와 확대 수준을 설정 */
+  bounds: PropTypes.shape({
+    value: PropTypes.arrayOf(Position).isRequired as PropTypes.Validator<[
+      PropTypes.InferProps<{
+        lat: PropTypes.Validator<number>;
+        lng: PropTypes.Validator<number>;
+      }>,
+      PropTypes.InferProps<{
+        lat: PropTypes.Validator<number>;
+        lng: PropTypes.Validator<number>;
+      }>
+    ]>,
+    paddingTop: PropTypes.number,
+    paddingRight: PropTypes.number,
+    paddingBottom: PropTypes.number,
+    paddingLeft: PropTypes.number,
+  }),
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDoubleClick: PropTypes.func,
+  /** () => void */
+  onRightClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseMove: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDrag: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDragStart: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onDragEnd: PropTypes.func,
+  /** (e: { zoomLevel: number }) => void */
+  onZoomStart: PropTypes.func,
+  /** (e: { zoomLevel: number }) => void */
+  onZoomChange: PropTypes.func,
+  /** (e: { zoomLevel: number, position: { lat: number, lng: number }, bounds: [{lat: number, lng: number}, {lat: number, lng: number}] }) => void */
+  onIdle: PropTypes.func,
+  /** () => void */
+  onBoundsChanged: PropTypes.func,
+  /** () => void */
+  onTilesLoaded: PropTypes.func,
 };
 
 export default KakaoMap;
