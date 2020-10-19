@@ -29,61 +29,10 @@ export interface IKakaoMapsEllipseProps {
   onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
 }
 
-class Ellipse extends React.Component<IKakaoMapsEllipseProps> {
-  context!: React.ContextType<typeof MapContext>;
-  static contextType = MapContext;
+function Ellipse(props: React.PropsWithChildren<IKakaoMapsEllipseProps>) {
+  const { map } = React.useContext(MapContext);
 
-  private ellipse: IKakaoEllipse;
-
-  public static defaultProps = {
-    fillColor: "transparent",
-    fillOpacity: 1,
-    strokeColor: "#000",
-    strokeWeight: 1,
-    strokeOpacity: 1,
-    strokeStyle: "solid",
-    zIndex: 0,
-  };
-
-  public static propTypes = {
-    /** 맵에 표시될 좌표 */
-    position: PropTypes.shape({
-      lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired,
-    }).isRequired,
-    /** 단위 : m */
-    rx: PropTypes.number.isRequired,
-    /** 단위 : m */
-    ry: PropTypes.number.isRequired,
-    /** 채움 색 */
-    fillColor: PropTypes.string,
-    /** 채움 색의 불투명도 ( 0 ~ 1 ) */
-    fillOpacity: PropTypes.number,
-    /** 선 색 */
-    strokeColor: PropTypes.string,
-    /** 선 불투명도 ( 0 ~ 1 ) */
-    strokeOpacity: PropTypes.number,
-    /** 선의 두께 ( 단위 : px ) */
-    strokeWeight: PropTypes.number,
-    /** 선 스타일 */
-    strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
-    /** z-index 속성 값 */
-    zIndex: PropTypes.number,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseDown: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseMove: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOver: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOut: PropTypes.func,
-  };
-
-  constructor(props: IKakaoMapsEllipseProps) {
-    super(props);
-
+  const ellipse = React.useMemo<IKakaoEllipse>(() => {
     const options: IKakaoEllipseOptions = {
       center: new kakao.maps.LatLng(props.position.lat, props.position.lng),
       rx: props.rx,
@@ -96,120 +45,167 @@ class Ellipse extends React.Component<IKakaoMapsEllipseProps> {
       strokeStyle: props.strokeStyle,
       zIndex: props.zIndex,
     };
-    this.ellipse = new kakao.maps.Ellipse(options);
+    const $ellipse = new kakao.maps.Ellipse(options);
 
-    kakao.maps.event.addListener(this.ellipse, "click", this.onClick);
-    kakao.maps.event.addListener(this.ellipse, "mousemove", this.onMouseMove);
-    kakao.maps.event.addListener(this.ellipse, "mousedown", this.onMouseDown);
-    kakao.maps.event.addListener(this.ellipse, "mouseover", this.onMouseOver);
-    kakao.maps.event.addListener(this.ellipse, "mouseout", this.onMouseOut);
-  }
+    return $ellipse;
+  }, []);
 
-  public componentDidMount() {
-    this.ellipse.setMap(this.context.map);
-  }
+  React.useEffect(() => {
+    ellipse.setMap(map);
+    return () => ellipse.setMap(null);
+  }, []);
 
-  public componentWillUnmount() {
-    kakao.maps.event.removeListener(this.ellipse, "click", this.onClick);
-    kakao.maps.event.removeListener(this.ellipse, "mousemove", this.onMouseMove);
-    kakao.maps.event.removeListener(this.ellipse, "mousedown", this.onMouseDown);
-    kakao.maps.event.removeListener(this.ellipse, "mouseover", this.onMouseOver);
-    kakao.maps.event.removeListener(this.ellipse, "mouseout", this.onMouseOut);
+  const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
 
-    this.ellipse.setMap(null);
-  }
-
-  public componentWillReceiveProps(nextProps: IKakaoMapsEllipseProps) {
-    if (nextProps.position.lat !== this.props.position.lat || nextProps.position.lng !== this.props.position.lng) {
-      const latlng = new kakao.maps.LatLng(nextProps.position.lat, nextProps.position.lng);
-      this.ellipse.setPosition(latlng);
-    }
-
-    if (nextProps.rx !== this.props.rx || nextProps.ry !== this.props.ry) {
-      this.ellipse.setRadius(nextProps.rx, nextProps.ry);
-    }
-
-    if (nextProps.fillColor !== this.props.fillColor) {
-      this.ellipse.setOptions({ fillColor: nextProps.fillColor });
-    }
-
-    if (nextProps.fillOpacity !== this.props.fillOpacity) {
-      this.ellipse.setOptions({ fillOpacity: nextProps.fillOpacity });
-    }
-
-    if (nextProps.strokeColor !== this.props.strokeColor) {
-      this.ellipse.setOptions({ strokeColor: nextProps.strokeColor });
-    }
-
-    if (nextProps.strokeWeight !== this.props.strokeWeight) {
-      this.ellipse.setOptions({ strokeWeight: nextProps.strokeWeight });
-    }
-
-    if (nextProps.strokeOpacity !== this.props.strokeOpacity) {
-      this.ellipse.setOptions({ strokeOpacity: nextProps.strokeOpacity });
-    }
-
-    if (nextProps.strokeStyle !== this.props.strokeStyle) {
-      this.ellipse.setOptions({ strokeStyle: nextProps.strokeStyle });
-    }
-
-    if (nextProps.zIndex !== this.props.zIndex) {
-      this.ellipse.setZIndex(nextProps.zIndex!);
-    }
-  }
-
-  public render() {
-    return (
-      <EllipseContext.Provider value={{ ellipse: this.ellipse }}>
-        {this.props.children}
-      </EllipseContext.Provider>
-    );
-  }
-
-  private onClick = (e: IKakaoMouseEvent) => {
-    this.props.onClick?.({
+  listeners.current.onClick = function onClick(e: IKakaoMouseEvent) {
+    props.onClick?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
-    })
-  };
+    });
+  }
 
-  private onMouseMove = (e: IKakaoMouseEvent) => {
-    this.props.onMouseMove?.({
+  listeners.current.onMouseMove = function onMouseMove(e: IKakaoMouseEvent) {
+    props.onMouseMove?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
-    })
-  };
+    });
+  }
 
-  private onMouseDown = (e: IKakaoMouseEvent) => {
-    this.props.onMouseDown?.({
+  listeners.current.onMouseDown = function onMouseDown(e: IKakaoMouseEvent) {
+    props.onMouseDown?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
-    })
-  };
+    });
+  }
 
-  private onMouseOver = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOver?.({
+  listeners.current.onMouseOver = function onMouseOver(e: IKakaoMouseEvent) {
+    props.onMouseOver?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
-    })
-  };
+    });
+  }
 
-  private onMouseOut = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOut?.({
+  listeners.current.onMouseOut = function onMouseOut(e: IKakaoMouseEvent) {
+    props.onMouseOut?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
-    })
-  };
+    });
+  }
+
+  React.useEffect(() => {
+    kakao.maps.event.addListener(ellipse, "click", listeners.current.onClick);
+    kakao.maps.event.addListener(ellipse, "mousemove", listeners.current.onMouseMove);
+    kakao.maps.event.addListener(ellipse, "mousedown", listeners.current.onMouseDown);
+    kakao.maps.event.addListener(ellipse, "mouseover", listeners.current.onMouseOver);
+    kakao.maps.event.addListener(ellipse, "mouseout", listeners.current.onMouseOut);
+
+    return () => {
+      kakao.maps.event.removeListener(ellipse, "click", listeners.current.onClick);
+      kakao.maps.event.removeListener(ellipse, "mousemove", listeners.current.onMouseMove);
+      kakao.maps.event.removeListener(ellipse, "mousedown", listeners.current.onMouseDown);
+      kakao.maps.event.removeListener(ellipse, "mouseover", listeners.current.onMouseOver);
+      kakao.maps.event.removeListener(ellipse, "mouseout", listeners.current.onMouseOut);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const latlng = new kakao.maps.LatLng(props.position.lat, props.position.lng);
+    ellipse.setPosition(latlng);
+  }, [props.position.lat, props.position.lng]);
+
+  React.useEffect(() => {
+    ellipse.setRadius(props.rx, props.ry);
+  }, [props.rx, props.ry]);
+
+  React.useEffect(() => {
+    ellipse.setOptions({ fillColor: props.fillColor });
+  }, [props.fillColor]);
+
+  React.useEffect(() => {
+    ellipse.setOptions({ fillOpacity: props.fillOpacity });
+  }, [props.fillOpacity]);
+
+  React.useEffect(() => {
+    ellipse.setOptions({ strokeWeight: props.strokeWeight });
+  }, [props.strokeWeight]);
+
+  React.useEffect(() => {
+    ellipse.setOptions({ strokeColor: props.strokeColor });
+  }, [props.strokeColor]);
+
+  React.useEffect(() => {
+    ellipse.setOptions({ strokeOpacity: props.strokeOpacity });
+  }, [props.strokeOpacity]);
+
+  React.useEffect(() => {
+    ellipse.setOptions({ strokeStyle: props.strokeStyle });
+  }, [props.strokeStyle]);
+
+  React.useEffect(() => {
+    ellipse.setZIndex(props.zIndex!);
+  }, [props.zIndex]);
+
+  return (
+    <EllipseContext.Provider value={{ ellipse }}>
+      {props.children}
+    </EllipseContext.Provider>
+  );
+}
+
+Ellipse.defaultProps = {
+  fillColor: "transparent",
+  fillOpacity: 1,
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+};
+
+Ellipse.propTypes = {
+  /** 맵에 표시될 좌표 */
+  position: PropTypes.shape({
+    lat: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired,
+  }).isRequired,
+  /** 단위 : m */
+  rx: PropTypes.number.isRequired,
+  /** 단위 : m */
+  ry: PropTypes.number.isRequired,
+  /** 채움 색 */
+  fillColor: PropTypes.string,
+  /** 채움 색의 불투명도 ( 0 ~ 1 ) */
+  fillOpacity: PropTypes.number,
+  /** 선 색 */
+  strokeColor: PropTypes.string,
+  /** 선 불투명도 ( 0 ~ 1 ) */
+  strokeOpacity: PropTypes.number,
+  /** 선의 두께 ( 단위 : px ) */
+  strokeWeight: PropTypes.number,
+  /** 선 스타일 */
+  strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
+  /** z-index 속성 값 */
+  zIndex: PropTypes.number,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseDown: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseMove: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOver: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOut: PropTypes.func,
 };
 
 export default Ellipse;

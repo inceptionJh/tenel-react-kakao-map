@@ -11,6 +11,7 @@ declare var kakao: IKakao;
 
 export interface IKakaoMapsRectangleProps {
   className?: string;
+  /** [SW, NE] */
   bounds: [{ lat: number, lng: number }, { lat: number, lng: number }];
   fillColor?: string;
   fillOpacity?: number;
@@ -32,68 +33,12 @@ const Position = PropTypes.shape({
   lng: PropTypes.number.isRequired,
 }).isRequired;
 
-class Rectangle extends React.Component<IKakaoMapsRectangleProps> {
-  context!: React.ContextType<typeof MapContext>;
-  static contextType = MapContext;
+function Rectangle(props: React.PropsWithChildren<IKakaoMapsRectangleProps>) {
+  const { map } = React.useContext(MapContext);
 
-  private rectangle: IKakaoRectangle;
-
-  public static defaultProps = {
-    fillColor: "transparent",
-    fillOpacity: 1,
-    strokeColor: "#000",
-    strokeWeight: 1,
-    strokeOpacity: 1,
-    strokeStyle: "solid",
-    zIndex: 0,
-  };
-
-  public static propTypes = {
-    /**
-     * bounds[0] : Position ( SW )
-     * bounds[1] : Position ( NE )
-     */
-    bounds: PropTypes.arrayOf(Position).isRequired as PropTypes.Validator<[
-      PropTypes.InferProps<{
-        lat: PropTypes.Validator<number>;
-        lng: PropTypes.Validator<number>;
-      }>,
-      PropTypes.InferProps<{
-        lat: PropTypes.Validator<number>;
-        lng: PropTypes.Validator<number>;
-      }>
-    ]>,
-    /** 채움 색 */
-    fillColor: PropTypes.string,
-    /** 채움 색의 불투명도 ( 0 ~ 1 ) */
-    fillOpacity: PropTypes.number,
-    /** 선 색 */
-    strokeColor: PropTypes.string,
-    /** 선 불투명도 ( 0 ~ 1 ) */
-    strokeOpacity: PropTypes.number,
-    /** 선의 두께 ( 단위 : px ) */
-    strokeWeight: PropTypes.number,
-    /** 선 스타일 */
-    strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
-    /** z-index 속성 값 */
-    zIndex: PropTypes.number,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onClick: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseDown: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseMove: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOver: PropTypes.func,
-    /** (e: { position: { lat: number, lng: number } }) => void */
-    onMouseOut: PropTypes.func,
-  };
-
-  constructor(props: IKakaoMapsRectangleProps) {
-    super(props);
-
-    const sw = new kakao.maps.LatLng(this.props.bounds[0].lat, this.props.bounds[0].lng);
-    const ne = new kakao.maps.LatLng(this.props.bounds[1].lat, this.props.bounds[1].lng);
+  const rectangle = React.useMemo<IKakaoRectangle>(() => {
+    const sw = new kakao.maps.LatLng(props.bounds[0].lat, props.bounds[0].lng);
+    const ne = new kakao.maps.LatLng(props.bounds[1].lat, props.bounds[1].lng);
     const bounds = new kakao.maps.LatLngBounds(sw, ne);
     const options: IKakaoRectangleOptions = {
       bounds,
@@ -105,78 +50,20 @@ class Rectangle extends React.Component<IKakaoMapsRectangleProps> {
       strokeStyle: props.strokeStyle,
       zIndex: props.zIndex,
     };
-    this.rectangle = new kakao.maps.Rectangle(options);
+    const $rectangle = new kakao.maps.Rectangle(options);
 
-    kakao.maps.event.addListener(this.rectangle, "click", this.onClick);
-    kakao.maps.event.addListener(this.rectangle, "mousemove", this.onMouseMove);
-    kakao.maps.event.addListener(this.rectangle, "mousedown", this.onMouseDown);
-    kakao.maps.event.addListener(this.rectangle, "mouseover", this.onMouseOver);
-    kakao.maps.event.addListener(this.rectangle, "mouseout", this.onMouseOut);
-  }
+    return $rectangle;
+  }, []);
 
-  public componentDidMount() {
-    this.rectangle.setMap(this.context.map);
-  }
+  React.useEffect(() => {
+    rectangle.setMap(map);
+    return () => rectangle.setMap(null);
+  }, []);
 
-  public componentWillUnmount() {
-    kakao.maps.event.removeListener(this.rectangle, "click", this.onClick);
-    kakao.maps.event.removeListener(this.rectangle, "mousemove", this.onMouseMove);
-    kakao.maps.event.removeListener(this.rectangle, "mousedown", this.onMouseDown);
-    kakao.maps.event.removeListener(this.rectangle, "mouseover", this.onMouseOver);
-    kakao.maps.event.removeListener(this.rectangle, "mouseout", this.onMouseOut);
+  const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
 
-    this.rectangle.setMap(null);
-  }
-
-  public componentWillReceiveProps(nextProps: IKakaoMapsRectangleProps) {
-    const nextBounds = nextProps.bounds.flat(Infinity).map((point: { lat: number, lng: number }) => `${point.lat},${point.lng}`).join();
-    const currentBounds = this.props.bounds.flat(Infinity).map((point: { lat: number, lng: number }) => `${point.lat},${point.lng}`).join();
-    if (nextBounds !== currentBounds) {
-      const sw = new kakao.maps.LatLng(this.props.bounds[0].lat, this.props.bounds[0].lng);
-      const ne = new kakao.maps.LatLng(this.props.bounds[1].lat, this.props.bounds[1].lng);
-      const bounds = new kakao.maps.LatLngBounds(sw, ne);
-      this.rectangle.setBounds(bounds);
-    }
-
-    if (nextProps.fillColor !== this.props.fillColor) {
-      this.rectangle.setOptions({ fillColor: nextProps.fillColor });
-    }
-
-    if (nextProps.fillOpacity !== this.props.fillOpacity) {
-      this.rectangle.setOptions({ fillOpacity: nextProps.fillOpacity });
-    }
-
-    if (nextProps.strokeColor !== this.props.strokeColor) {
-      this.rectangle.setOptions({ strokeColor: nextProps.strokeColor });
-    }
-
-    if (nextProps.strokeWeight !== this.props.strokeWeight) {
-      this.rectangle.setOptions({ strokeWeight: nextProps.strokeWeight });
-    }
-
-    if (nextProps.strokeOpacity !== this.props.strokeOpacity) {
-      this.rectangle.setOptions({ strokeOpacity: nextProps.strokeOpacity });
-    }
-
-    if (nextProps.strokeStyle !== this.props.strokeStyle) {
-      this.rectangle.setOptions({ strokeStyle: nextProps.strokeStyle });
-    }
-
-    if (nextProps.zIndex !== this.props.zIndex) {
-      this.rectangle.setZIndex(nextProps.zIndex!);
-    }
-  }
-
-  public render() {
-    return (
-      <RectangleContext.Provider value={{ rectangle: this.rectangle }}>
-        {this.props.children}
-      </RectangleContext.Provider>
-    );
-  }
-
-  private onClick = (e: IKakaoMouseEvent) => {
-    this.props.onClick?.({
+  listeners.current.onClick = function onClick(e: IKakaoMouseEvent) {
+    props.onClick?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -184,8 +71,8 @@ class Rectangle extends React.Component<IKakaoMapsRectangleProps> {
     });
   }
 
-  private onMouseMove = (e: IKakaoMouseEvent) => {
-    this.props.onMouseMove?.({
+  listeners.current.onMouseMove = function onMouseMove(e: IKakaoMouseEvent) {
+    props.onMouseMove?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -193,8 +80,8 @@ class Rectangle extends React.Component<IKakaoMapsRectangleProps> {
     });
   }
 
-  private onMouseDown = (e: IKakaoMouseEvent) => {
-    this.props.onMouseDown?.({
+  listeners.current.onMouseDown = function onMouseDown(e: IKakaoMouseEvent) {
+    props.onMouseDown?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -202,8 +89,8 @@ class Rectangle extends React.Component<IKakaoMapsRectangleProps> {
     });
   }
 
-  private onMouseOver = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOver?.({
+  listeners.current.onMouseOver = function onMouseOver(e: IKakaoMouseEvent) {
+    props.onMouseOver?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
@@ -211,14 +98,122 @@ class Rectangle extends React.Component<IKakaoMapsRectangleProps> {
     });
   }
 
-  private onMouseOut = (e: IKakaoMouseEvent) => {
-    this.props.onMouseOut?.({
+  listeners.current.onMouseOut = function onMouseOut(e: IKakaoMouseEvent) {
+    props.onMouseOut?.({
       position: {
         lat: e.latLng.getLat(),
         lng: e.latLng.getLng(),
       },
     });
   }
+
+  React.useEffect(() => {
+    kakao.maps.event.addListener(rectangle, "click", listeners.current.onClick);
+    kakao.maps.event.addListener(rectangle, "mousemove", listeners.current.onMouseMove);
+    kakao.maps.event.addListener(rectangle, "mousedown", listeners.current.onMouseDown);
+    kakao.maps.event.addListener(rectangle, "mouseover", listeners.current.onMouseOver);
+    kakao.maps.event.addListener(rectangle, "mouseout", listeners.current.onMouseOut);
+
+    return () => {
+      kakao.maps.event.removeListener(rectangle, "click", listeners.current.onClick);
+      kakao.maps.event.removeListener(rectangle, "mousemove", listeners.current.onMouseMove);
+      kakao.maps.event.removeListener(rectangle, "mousedown", listeners.current.onMouseDown);
+      kakao.maps.event.removeListener(rectangle, "mouseover", listeners.current.onMouseOver);
+      kakao.maps.event.removeListener(rectangle, "mouseout", listeners.current.onMouseOut);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const sw = new kakao.maps.LatLng(props.bounds[0].lat, props.bounds[0].lng);
+    const ne = new kakao.maps.LatLng(props.bounds[1].lat, props.bounds[1].lng);
+    const bounds = new kakao.maps.LatLngBounds(sw, ne);
+    rectangle.setBounds(bounds);
+  }, [props.bounds.flat(Infinity).join(",")]);
+
+  React.useEffect(() => {
+    rectangle.setOptions({ fillColor: props.fillColor });
+  }, [props.fillColor]);
+
+  React.useEffect(() => {
+    rectangle.setOptions({ fillOpacity: props.fillOpacity });
+  }, [props.fillOpacity]);
+
+  React.useEffect(() => {
+    rectangle.setOptions({ strokeColor: props.strokeColor });
+  }, [props.strokeColor]);
+
+  React.useEffect(() => {
+    rectangle.setOptions({ strokeWeight: props.strokeWeight });
+  }, [props.strokeWeight]);
+
+  React.useEffect(() => {
+    rectangle.setOptions({ strokeOpacity: props.strokeOpacity });
+  }, [props.strokeOpacity]);
+
+  React.useEffect(() => {
+    rectangle.setOptions({ strokeStyle: props.strokeStyle });
+  }, [props.strokeStyle]);
+
+  React.useEffect(() => {
+    rectangle.setZIndex(props.zIndex!);
+  }, [props.zIndex]);
+
+  return (
+    <RectangleContext.Provider value={{ rectangle }}>
+      {props.children}
+    </RectangleContext.Provider>
+  );
+}
+
+Rectangle.defaultProps = {
+  fillColor: "transparent",
+  fillOpacity: 1,
+  strokeColor: "#000",
+  strokeWeight: 1,
+  strokeOpacity: 1,
+  strokeStyle: "solid",
+  zIndex: 0,
+};
+
+Rectangle.propTypes = {
+  /**
+   * bounds[0] : Position ( SW )
+   * bounds[1] : Position ( NE )
+   */
+  bounds: PropTypes.arrayOf(Position).isRequired as PropTypes.Validator<[
+    PropTypes.InferProps<{
+      lat: PropTypes.Validator<number>;
+      lng: PropTypes.Validator<number>;
+    }>,
+    PropTypes.InferProps<{
+      lat: PropTypes.Validator<number>;
+      lng: PropTypes.Validator<number>;
+    }>
+  ]>,
+  /** 채움 색 */
+  fillColor: PropTypes.string,
+  /** 채움 색의 불투명도 ( 0 ~ 1 ) */
+  fillOpacity: PropTypes.number,
+  /** 선 색 */
+  strokeColor: PropTypes.string,
+  /** 선 불투명도 ( 0 ~ 1 ) */
+  strokeOpacity: PropTypes.number,
+  /** 선의 두께 ( 단위 : px ) */
+  strokeWeight: PropTypes.number,
+  /** 선 스타일 */
+  strokeStyle: PropTypes.oneOf(["solid", "shortdash", "shortdot", "shortdashdot", "shortdashdotdot", "dot", "dash", "dashdot", "longdash", "longdashdot", "longdashdotdot"]),
+  /** z-index 속성 값 */
+  zIndex: PropTypes.number,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onClick: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseDown: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseMove: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOver: PropTypes.func,
+  /** (e: { position: { lat: number, lng: number } }) => void */
+  onMouseOut: PropTypes.func,
 };
 
 export default Rectangle;
