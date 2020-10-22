@@ -128,6 +128,19 @@ function Polygon(props: React.PropsWithChildren<IKakaoMapsPolygonProps>) {
   }, []);
 
   React.useEffect(() => {
+    const path = (props.path as any).map((positionOrPath: { lat: number, lng: number } | { lat: number, lng: number }[]) => {
+      if ("lat" in positionOrPath) {
+        return new kakao.maps.LatLng(positionOrPath.lat, positionOrPath.lng);
+      } else {
+        return positionOrPath.map((position) => {
+          return new kakao.maps.LatLng(position.lat, position.lng);
+        });
+      }
+    });
+    polygon.setPath(path);
+  }, [props.path]);
+
+  React.useEffect(() => {
     polygon.setOptions({ fillColor: props.fillColor });
   }, [props.fillColor]);
 
