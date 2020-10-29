@@ -107,6 +107,14 @@ function Circle(props: React.PropsWithChildren<IKakaoMapsCircleProps>) {
     kakao.maps.event.addListener(circle, "mousedown", listeners.current.onMouseDown);
     kakao.maps.event.addListener(circle, "mouseover", listeners.current.onMouseOver);
     kakao.maps.event.addListener(circle, "mouseout", listeners.current.onMouseOut);
+
+    return () => {
+      kakao.maps.event.removeListener(circle, "click", listeners.current.onClick);
+      kakao.maps.event.removeListener(circle, "mousemove", listeners.current.onMouseMove);
+      kakao.maps.event.removeListener(circle, "mousedown", listeners.current.onMouseDown);
+      kakao.maps.event.removeListener(circle, "mouseover", listeners.current.onMouseOver);
+      kakao.maps.event.removeListener(circle, "mouseout", listeners.current.onMouseOut);
+    };
   }, []);
 
   React.useEffect(() => {
