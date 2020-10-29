@@ -8,8 +8,12 @@ import type { IKakao, IKakaoCopyrightPosition, TKakaoOverayMapTypeIdKey, TKakaoB
 
 declare var kakao: IKakao;
 
+export interface IKakaoMapsMapRef {
+  map: IKakaoMap;
+}
+
 export interface IKakaoMapsMapProps {
-  container: HTMLElement;
+  container?: HTMLElement;
   center: { lat: number, lng: number };
   baseMapType?: TKakaoBaseMapTypeIdKey;
   overlayMapTypes?: TKakaoOverayMapTypeIdKey[];
@@ -63,7 +67,7 @@ const Position = PropTypes.shape({
   lng: PropTypes.number.isRequired,
 }).isRequired;
 
-function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
+const KakaoMap = React.forwardRef<IKakaoMapsMapRef, React.PropsWithChildren<IKakaoMapsMapProps>>((props, ref) => {
   const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
 
   listeners.current.onClick = function onClick(e: IKakaoMouseEvent) {
@@ -164,13 +168,17 @@ function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
     props.onTilesLoaded?.();
   }
 
-  const map = React.useMemo<IKakaoMap>(() => {
+  const [map, mapEl] = React.useMemo<[IKakaoMap, HTMLDivElement]>(() => {
+    const $mapEl = document.createElement("div");
+    $mapEl.style.width = "100%";
+    $mapEl.style.height = "100%";
+
     const latlng = new kakao.maps.LatLng(props.center.lat, props.center.lng);
     const options: IKakaoMapOptions = {
       center: latlng,
       level: props.level,
     };
-    const $map = new kakao.maps.Map(props.container, options);
+    const $map = new kakao.maps.Map($mapEl, options);
 
     $map.setZoomable(props.zoomable!);
     $map.setDraggable(props.draggable!);
@@ -203,7 +211,14 @@ function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
     kakao.maps.event.addListener($map, "bounds_changed", listeners.current.onBoundsChanged);
     kakao.maps.event.addListener($map, "tilesloaded", listeners.current.onTilesLoaded);
 
-    return $map;
+    return [$map, $mapEl];
+  }, []);
+
+  React.useEffect(() => {
+    if (!props.container) return;
+
+    props.container.append(mapEl);
+    map.relayout();
   }, [props.container]);
 
   React.useEffect(() => {
@@ -290,12 +305,16 @@ function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
     map.setLevel(props.level!, options);
   }, [props.levelDuration, props.level]);
 
+  React.useImperativeHandle(ref, () => {
+    return { map };
+  });
+
   return (
     <KakaoMapContext.Provider value={{ map }}>
       {props.children}
     </KakaoMapContext.Provider>
   );
-}
+})
 
 KakaoMap.defaultProps = {
   zoomable: true,
@@ -311,7 +330,7 @@ KakaoMap.defaultProps = {
 
 KakaoMap.propTypes = {
   /** 지도가 표시될 HTML element */
-  container: PropTypes.instanceOf(HTMLElement).isRequired,
+  container: PropTypes.instanceOf(HTMLElement),
   /** 지도의 중심 좌표 */
   center: Position,
   /** 커서 모양 */
@@ -325,7 +344,7 @@ KakaoMap.propTypes = {
   /** 확대/축소 트렌지션 시간 ( 단위 : ms ) */
   levelDuration: PropTypes.number,
   /** 지도의 타입을 설정 */
-  baseMapType: PropTypes.oneOf(["ROADMAP", "SKYVIEW", "HYBRID"]),
+  baseMapType: PropTypes.oneOf(["ROADMAP", "SKYVIEW", "HYBRID"] as const),
   /** 지도에 오버레이할 타입을 설정 */
   overlayMapTypes: PropTypes.arrayOf(PropTypes.oneOf(["OVERLAY", "ROADVIEW", "TRAFFIC", "TERRAIN", "BICYCLE", "BICYCLE_HYBRID", "USE_DISTRICT"] as const).isRequired),
   /** 확대/축소 가능 여부 */
@@ -333,27 +352,28 @@ KakaoMap.propTypes = {
   /** 드래그 가능 여부 */
   draggable: PropTypes.bool,
   /** Copyright 위치 및 반전 */
+  // copyright: React.Validator<{
+  //   position: keyof IKakaoCopyrightPosition;
+  //   reverse?: boolean | undefined;
+  // } | null | undefined> | undefined,
   copyright: PropTypes.shape({
-    position: PropTypes.oneOf(["BOTTOMLEFT", "BOTTOMRIGHT"] as const).isRequired,
+    position: PropTypes.oneOf<"BOTTOMLEFT" | "BOTTOMRIGHT">(["BOTTOMLEFT", "BOTTOMRIGHT"]).isRequired,
     reverse: PropTypes.bool,
-  }),
+  }) as React.Validator<{ position: keyof IKakaoCopyrightPosition; reverse?: boolean; }>,
   /** 주어진 영역이 화면 안에 전부 나타날 수 있도록 지도의 중심 좌표와 확대 수준을 설정 */
   bounds: PropTypes.shape({
-    value: PropTypes.arrayOf(Position).isRequired as PropTypes.Validator<[
-      PropTypes.InferProps<{
-        lat: PropTypes.Validator<number>;
-        lng: PropTypes.Validator<number>;
-      }>,
-      PropTypes.InferProps<{
-        lat: PropTypes.Validator<number>;
-        lng: PropTypes.Validator<number>;
-      }>
-    ]>,
+    value: PropTypes.arrayOf(Position).isRequired,
     paddingTop: PropTypes.number,
     paddingRight: PropTypes.number,
     paddingBottom: PropTypes.number,
     paddingLeft: PropTypes.number,
-  }),
+  }) as React.Validator<{
+    value: [{ lat: number, lng: number }, { lat: number, lng: number }];
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
+  }>,
   /** (e: { position: { lat: number, lng: number } }) => void */
   onClick: PropTypes.func,
   /** (e: { position: { lat: number, lng: number } }) => void */
