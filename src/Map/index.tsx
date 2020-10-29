@@ -190,8 +190,6 @@ function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
       $map.setBounds(kakaoBounds, props.bounds.paddingTop, props.bounds.paddingRight, props.bounds.paddingBottom, props.bounds.paddingLeft);
     }
 
-    props.overlayMapTypes?.forEach((prevType) => $map.addOverlayMapTypeId(kakao.maps.MapTypeId[prevType]));
-
     kakao.maps.event.addListener($map, "click", listeners.current.onClick);
     kakao.maps.event.addListener($map, "dblclick" as any, listeners.current.onDoubleClick);
     kakao.maps.event.addListener($map, "rightclick", listeners.current.onRightClick);
@@ -251,18 +249,14 @@ function KakaoMap(props: React.PropsWithChildren<IKakaoMapsMapProps>) {
   }, [props.baseMapType]);
 
   React.useEffect(() => {
-    props.overlayMapTypes?.forEach((prevType) => {
-      if (!(props.overlayMapTypes?.includes(prevType))) {
-        map.removeOverlayMapTypeId(kakao.maps.MapTypeId[prevType]);
-      }
+    // tslint:disable-next-line: forin
+    for (const type in kakao.maps.MapTypeId) {
+      map.removeOverlayMapTypeId(kakao.maps.MapTypeId[type as TKakaoOverayMapTypeIdKey]);
+    }
+    props.overlayMapTypes?.forEach((type) => {
+      map.addOverlayMapTypeId(kakao.maps.MapTypeId[type]);
     });
-
-    props.overlayMapTypes?.forEach((currType) => {
-      if (!(props.overlayMapTypes?.includes(currType))) {
-        map.addOverlayMapTypeId(kakao.maps.MapTypeId[currType]);
-      }
-    });
-  }, [props.overlayMapTypes?.sort().join()]);
+  }, [props.overlayMapTypes]);
 
   React.useEffect(() => {
     map.setCopyrightPosition(kakao.maps.CopyrightPosition[props.copyright!.position], props.copyright!.reverse);
