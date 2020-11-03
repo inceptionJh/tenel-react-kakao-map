@@ -120,7 +120,7 @@ function Polyline(props: React.PropsWithChildren<IKakaoMapsPolylineProps>) {
     polyline.setPath(props.path.map((position) => {
       return new kakao.maps.LatLng(position.lat, position.lng);
     }));
-  }, [props.path.flat(Infinity).join(",")]);
+  }, [props.path]);
 
   React.useEffect(() => {
     polyline.setOptions({ strokeColor: props.strokeColor });
