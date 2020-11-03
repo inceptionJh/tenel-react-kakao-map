@@ -309,9 +309,13 @@ const KakaoMap = React.forwardRef<IKakaoMapsMapRef, React.PropsWithChildren<IKak
     return { map };
   });
 
+  const [mount, setMount] = React.useState(false);
+
+  React.useEffect(() => setMount(true), []);
+
   return (
     <KakaoMapContext.Provider value={{ map }}>
-      {props.children}
+      {mount && props.children}
     </KakaoMapContext.Provider>
   );
 })
