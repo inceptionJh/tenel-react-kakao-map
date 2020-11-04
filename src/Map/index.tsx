@@ -217,7 +217,7 @@ const KakaoMap = React.forwardRef<IKakaoMapsMapRef, React.PropsWithChildren<IKak
   React.useEffect(() => {
     if (!props.container) return;
 
-    props.container.append(mapEl);
+    props.container.appendChild(mapEl);
     map.relayout();
   }, [props.container]);
 
