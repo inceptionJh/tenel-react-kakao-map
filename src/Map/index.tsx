@@ -44,7 +44,14 @@ export interface IKakaoMapsMapProps {
   onDragEnd?: (e: { position: { lat: number, lng: number } }) => void;
   onDragStart?: (e: { position: { lat: number, lng: number } }) => void;
   onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
-  onTilesLoaded?: () => void;
+  onTilesLoaded?: (e: {
+    zoomLevel: number,
+    position: { lat: number, lng: number },
+    bounds: [
+      { lat: number, lng: number },
+      { lat: number, lng: number },
+    ],
+  }) => void;
   onBoundsChanged?: (e: {
     bounds: [
       { lat: number, lng: number },
@@ -165,9 +172,18 @@ const KakaoMap = React.forwardRef<IKakaoMapsMapRef, React.PropsWithChildren<IKak
   }
 
   listeners.current.onTilesLoaded = function onTilesLoaded() {
-    props.onTilesLoaded?.();
+    props.onTilesLoaded?.({
+      zoomLevel: map.getLevel(),
+      position: {
+        lat: map.getCenter().getLat(),
+        lng: map.getCenter().getLng(),
+      },
+      bounds: [
+        { lat: map.getBounds().getSouthWest().getLat(), lng: map.getBounds().getSouthWest().getLng() },
+        { lat: map.getBounds().getNorthEast().getLat(), lng: map.getBounds().getNorthEast().getLng() },
+      ],
+    });
   }
-
   const [map, mapEl] = React.useMemo<[IKakaoMap, HTMLDivElement]>(() => {
     const $mapEl = document.createElement("div");
     $mapEl.style.width = "100%";
