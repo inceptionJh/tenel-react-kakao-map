@@ -118,7 +118,7 @@ function Polyline(props: React.PropsWithChildren<IKakaoMapsPolylineProps>) {
   }, []);
 
   React.useEffect(() => {
-    props?.onPolylineLengthChange?.(polyline.getLength());
+    props.onPolylineLengthChange?.(polyline.getLength());
 
     polyline.setPath(props.path.map((position) => {
       return new kakao.maps.LatLng(position.lat, position.lng);
