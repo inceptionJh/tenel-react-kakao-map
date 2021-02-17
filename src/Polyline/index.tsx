@@ -23,6 +23,7 @@ export interface IKakaoMapsPolylineProps {
   onMouseMove?: (e: { position: { lat: number, lng: number } }) => void;
   onMouseOver?: (e: { position: { lat: number, lng: number } }) => void;
   onMouseOut?: (e: { position: { lat: number, lng: number } }) => void;
+  onPolylineLengthChange?: (length: number) => void;
 }
 
 const Position = PropTypes.shape({
@@ -117,6 +118,8 @@ function Polyline(props: React.PropsWithChildren<IKakaoMapsPolylineProps>) {
   }, []);
 
   React.useEffect(() => {
+    props?.onPolylineLengthChange?.(polyline.getLength());
+
     polyline.setPath(props.path.map((position) => {
       return new kakao.maps.LatLng(position.lat, position.lng);
     }));
