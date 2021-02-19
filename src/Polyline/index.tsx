@@ -51,7 +51,7 @@ function Polyline(props: React.PropsWithChildren<IKakaoMapsPolylineProps>) {
 
   React.useEffect(() => {
     polyline.setMap(map);
-    return () => polyline.setMap(map);
+    return () => polyline.setMap(null);
   }, []);
 
   const listeners = React.useRef<{ [listener: string]: (...args: any[]) => void }>({});
