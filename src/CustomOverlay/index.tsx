@@ -50,17 +50,13 @@ const CustomOverlay: React.FunctionComponent<IKakaoMapsCustomOverlayProps> = (pr
     };
 
     return [new kakao.maps.CustomOverlay(options), contentEl];
-  }, []);
+  }, [props.content]);
 
   _hooks.useInit(customOverlay);
   _hooks.useRange(customOverlay, props.range!);
   _hooks.useZIndex(customOverlay, props.zIndex!);
   _hooks.usePosition(customOverlay, props.position);
   _hooks.useAltitude(customOverlay, props.altitude!);
-
-  React.useEffect(() => {
-    customOverlay.setContent(props.content);
-  }, [props.content]);
 
   return (
     <CustomOverlayContext.Provider value={{ customOverlay }}>
